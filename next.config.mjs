@@ -1,6 +1,10 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  /* config options here */
-};
 
+const nextConfig = {
+  reactStrictMode: true,
+  images: { domains: ['reviwes-backend.onrender.com'] },
+};
 export default nextConfig;
+
+
+
+
