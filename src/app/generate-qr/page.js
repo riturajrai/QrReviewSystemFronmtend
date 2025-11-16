@@ -33,7 +33,7 @@ function QRContent() {
   const [copySuccess, setCopySuccess] = useState(false);
   const [error, setError] = useState("");
 
-  const API_BASE = https://qrreviewbackend.onrender.com/api";
+  const API_BASE = "https://qrreviewbackend.onrender.com/api";
 
   /* ------------------- Fetch Existing QR ------------------- */
   const fetchQR = async () => {
