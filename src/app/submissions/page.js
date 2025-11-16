@@ -62,7 +62,6 @@ function SubmissionsContent() {
 
   useEffect(() => {
     fetchFeedbacks();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /* ------------------- Search & Filter ------------------- */
@@ -119,14 +118,14 @@ function SubmissionsContent() {
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-xl shadow-sm border border-red-200 p-8 text-center max-w-md">
-          <ExclamationTriangleIcon className="w-16 h-16 text-red-500 mx-auto mb-4" />
-          <p className="text-red-700 font-medium mb-4">{error}</p>
+        <div className="bg-white rounded-xl shadow-lg border border-red-200 p-8 text-center max-w-md">
+          <ExclamationTriangleIcon className="w-12 h-12 sm:w-16 sm:h-16 text-red-500 mx-auto mb-4" />
+          <p className="text-xs sm:text-sm text-red-700 font-medium mb-4">{error}</p>
           <button
             onClick={fetchFeedbacks}
-            className="inline-flex items-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-lg hover:bg-indigo-700 transition font-medium"
+            className="inline-flex items-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-lg hover:bg-indigo-700 transition text-xs sm:text-sm"
           >
-            <ArrowPathIcon className="w-5 h-5" />
+            <ArrowPathIcon className="w-4 h-4 sm:w-5 sm:h-5" />
             Retry
           </button>
         </div>
@@ -139,17 +138,19 @@ function SubmissionsContent() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 flex items-center gap-3">
-            <ChatBubbleLeftIcon className="w-10 h-10 text-indigo-600" />
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 flex items-center gap-3">
+            <ChatBubbleLeftIcon className="w-8 h-8 sm:w-10 sm:h-10 text-indigo-600" />
             All Submissions
           </h1>
-          <p className="mt-2 text-gray-600">View and manage all customer feedback</p>
+          <p className="mt-2 text-xs sm:text-sm text-gray-600">
+            View and manage all customer feedback
+          </p>
         </div>
 
         {/* Search & Export */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6 flex flex-col sm:flex-row gap-3">
           <div className="flex-1 relative">
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
             <input
               type="text"
               placeholder="Search by name, phone, or message..."
@@ -158,14 +159,14 @@ function SubmissionsContent() {
                 setSearch(e.target.value);
                 setPage(1);
               }}
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
+              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition text-xs sm:text-sm"
             />
           </div>
           <button
             onClick={exportCSV}
-            className="inline-flex items-center gap-2 bg-green-600 text-white px-5 py-2.5 rounded-lg hover:bg-green-700 transition font-medium"
+            className="inline-flex items-center gap-2 bg-green-600 text-white px-5 py-2.5 rounded-lg hover:bg-green-700 transition text-xs sm:text-sm"
           >
-            <DocumentArrowDownIcon className="w-5 h-5" />
+            <DocumentArrowDownIcon className="w-4 h-4 sm:w-5 sm:h-5" />
             Export CSV
           </button>
         </div>
@@ -175,29 +176,29 @@ function SubmissionsContent() {
           <EmptyState search={search} />
         ) : (
           <>
-            {/* Desktop Table */}
+            {/* Desktop Table (md+) */}
             <div className="hidden md:block bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="w-full">
                   <thead className="bg-gray-50 text-xs uppercase text-gray-700">
                     <tr>
-                      <th className="px-6 py-4 text-left font-medium">Name</th>
-                      <th className="px-6 py-4 text-left font-medium">Phone</th>
-                      <th className="px-6 py-4 text-left font-medium">Message</th>
-                      <th className="px-6 py-4 text-center font-medium">Rating</th>
-                      <th className="px-6 py-4 text-left font-medium">Submitted</th>
+                      <th className="px-6 py-4 text-left font-medium text-xs sm:text-sm">Name</th>
+                      <th className="px-6 py-4 text-left font-medium text-xs sm:text-sm">Phone</th>
+                      <th className="px-6 py-4 text-left font-medium text-xs sm:text-sm">Message</th>
+                      <th className="px-6 py-4 text-center font-medium text-xs sm:text-sm">Rating</th>
+                      <th className="px-6 py-4 text-left font-medium text-xs sm:text-sm">Submitted</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
                     {paginated.map((fb) => (
                       <tr key={fb._id} className="hover:bg-gray-50 transition">
-                        <td className="px-6 py-4 font-medium text-gray-900">
+                        <td className="px-6 py-4 font-medium text-gray-900 text-xs sm:text-sm">
                           {fb.name || "Anonymous"}
                         </td>
                         <td className="px-6 py-4 text-gray-600">
                           <div className="flex items-center gap-2">
                             <PhoneIcon className="w-4 h-4 text-gray-400" />
-                            <span>{fb.phone || "-"}</span>
+                            <span className="text-xs sm:text-sm">{fb.phone || "-"}</span>
                             {fb.phone && (
                               <button
                                 onClick={() => copyPhone(fb.phone, fb._id)}
@@ -209,7 +210,7 @@ function SubmissionsContent() {
                           </div>
                         </td>
                         <td
-                          className="px-6 py-4 text-gray-700 max-w-xs truncate"
+                          className="px-6 py-4 text-gray-700 max-w-xs truncate text-xs sm:text-sm"
                           title={fb.message}
                         >
                           {fb.message || "-"}
@@ -220,20 +221,20 @@ function SubmissionsContent() {
                               {[...Array(5)].map((_, i) => (
                                 <StarIcon
                                   key={i}
-                                  className={`w-5 h-5 ${
+                                  className={`w-4 h-4 sm:w-5 sm:h-5 ${
                                     i < fb.rating ? "text-yellow-400 fill-current" : "text-gray-300"
                                   }`}
                                 />
                               ))}
                             </div>
                           ) : (
-                            <span className="text-gray-400">-</span>
+                            <span className="text-xs sm:text-sm text-gray-400">-</span>
                           )}
                         </td>
-                        <td className="px-6 py-4 text-gray-600 text-sm">
-                          <div className="flex items-center gap-1">
+                        <td className="px-6 py-4 text-gray-600">
+                          <div className="flex items-center gap-1 text-xs sm:text-sm">
                             <ClockIcon className="w-4 h-4" />
-                            {new Date(fb.createdAt).toLocaleString()}
+                            {new Date(fb.createdAt).toLocaleDateString()}
                           </div>
                         </td>
                       </tr>
@@ -251,7 +252,7 @@ function SubmissionsContent() {
                   className="bg-white rounded-xl shadow-sm border border-gray-200 p-5"
                 >
                   <div className="flex justify-between items-start mb-3">
-                    <h3 className="font-semibold text-gray-900">
+                    <h3 className="font-semibold text-gray-900 text-xs sm:text-sm">
                       {fb.name || "Anonymous"}
                     </h3>
                     {fb.rating && (
@@ -269,7 +270,7 @@ function SubmissionsContent() {
                   </div>
 
                   {fb.phone && (
-                    <p className="text-sm text-gray-600 mb-2 flex items-center gap-2">
+                    <p className="text-xs text-gray-600 mb-2 flex items-center gap-2">
                       <PhoneIcon className="w-4 h-4" />
                       {fb.phone}
                       <button
@@ -282,7 +283,7 @@ function SubmissionsContent() {
                   )}
 
                   {fb.message && (
-                    <p className="text-sm italic text-gray-700 mb-3">"{fb.message}"</p>
+                    <p className="text-xs italic text-gray-700 mb-3">"{fb.message}"</p>
                   )}
 
                   <p className="text-xs text-gray-500 flex items-center gap-1">
@@ -299,17 +300,17 @@ function SubmissionsContent() {
                 <button
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page === 1}
-                  className="px-4 py-2 rounded-lg bg-white border border-gray-300 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition"
+                  className="px-4 py-2 rounded-lg bg-white border border-gray-300 text-xs sm:text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition"
                 >
                   Previous
                 </button>
-                <span className="text-sm text-gray-600 font-medium">
+                <span className="text-xs sm:text-sm text-gray-600 font-medium">
                   Page {page} of {totalPages}
                 </span>
                 <button
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   disabled={page === totalPages}
-                  className="px-4 py-2 rounded-lg bg-white border border-gray-300 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition"
+                  className="px-4 py-2 rounded-lg bg-white border border-gray-300 text-xs sm:text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition"
                 >
                   Next
                 </button>
@@ -326,12 +327,12 @@ function SubmissionsContent() {
 /*  Empty State                                                       */
 /* ------------------------------------------------------------------ */
 const EmptyState = ({ search }) => (
-  <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
-    <ChatBubbleLeftIcon className="w-20 h-20 text-gray-300 mx-auto mb-4" />
-    <h3 className="text-lg font-semibold text-gray-800 mb-2">
+  <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 sm:p-12 text-center">
+    <ChatBubbleLeftIcon className="w-16 h-16 sm:w-20 sm:h-20 text-gray-300 mx-auto mb-4" />
+    <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">
       {search ? "No matching submissions" : "No submissions yet"}
     </h3>
-    <p className="text-gray-600">
+    <p className="text-xs sm:text-sm text-gray-600">
       {search
         ? "Try adjusting your search term."
         : "Start collecting feedback using your QR code or link."}
@@ -345,15 +346,15 @@ const EmptyState = ({ search }) => (
 const SubmissionsSkeleton = () => (
   <div className="min-h-screen bg-gray-50 p-6">
     <div className="max-w-7xl mx-auto">
-      <div className="h-10 bg-gray-200 rounded w-64 mb-8 animate-pulse"></div>
+      <div className="h-8 sm:h-10 bg-gray-200 rounded w-64 mb-8 animate-pulse"></div>
       <div className="space-y-4">
         {[1, 2, 3, 4, 5].map((i) => (
           <div
             key={i}
             className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 animate-pulse"
           >
-            <div className="h-6 bg-gray-200 rounded w-3/4 mb-3"></div>
-            <div className="h-5 bg-gray-200 rounded w-1/2"></div>
+            <div className="h-5 sm:h-6 bg-gray-200 rounded w-3/4 mb-3"></div>
+            <div className="h-4 sm:h-5 bg-gray-200 rounded w-1/2"></div>
           </div>
         ))}
       </div>
