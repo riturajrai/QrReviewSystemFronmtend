@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import axios from "../llb/axios";
 
 const AuthContext = createContext();
@@ -9,24 +9,45 @@ const AuthContext = createContext();
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
 
-  // Fetch logged-in user from backend cookie
+  const router = useRouter();
+  const pathname = usePathname();
+
+  // Fetch user from backend cookies
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const res = await axios.get("/auth/me", { withCredentials: true });
         setUser(res.data.user);
-      } catch (error) {
+      } catch {
         setUser(null);
       } finally {
         setLoading(false);
       }
     };
+
     fetchUser();
   }, []);
 
-  // Login handler
+  // 🔥 Automatic Redirect Control System
+  useEffect(() => {
+    if (loading) return;
+
+    const publicRoutes = ["/", "/login", "/register"]; // unprotected pages
+
+    // If user is logged in and tries to visit Home/login/register → redirect to dashboard
+    if (user && publicRoutes.includes(pathname)) {
+      router.replace("/dashboard");
+    }
+
+    // If NOT logged in and tries to visit protected routes
+    if (!user && pathname.startsWith("/dashboard")) {
+      router.replace("/login");
+    }
+  }, [user, loading, pathname]);
+
+
+  // Login
   const login = async (email, password) => {
     try {
       const res = await axios.post(
@@ -37,14 +58,13 @@ export function AuthProvider({ children }) {
 
       setUser(res.data.user);
       router.push("/dashboard");
-
       return res.data;
     } catch (error) {
       throw new Error(error.response?.data?.message || "Login failed");
     }
   };
 
-  // Logout handler
+  // Logout
   const logout = async () => {
     try {
       await axios.post("/logout", {}, { withCredentials: true });
