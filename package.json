@@ -34,5 +34,8 @@
     "eslint": "^9",
     "eslint-config-next": "16.0.0",
     "tailwindcss": "^4"
-  }
+  },
+  "overrides": {
+  "react-hook-form": "^7.51.3"
+}
 }
