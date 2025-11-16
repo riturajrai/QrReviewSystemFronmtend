@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
 import { useState, useRef, useEffect } from "react";
+import logo from "../../../../public/logo.png";
 import {
   ChevronDown,
   LogOut,
@@ -61,25 +63,28 @@ export default function Navbar() {
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/generate-qr", label: "Generate QR", icon: QrCode },
     { href: "/submissions", label: "Submissions", icon: FileText },
-     { href: "/formSettings", label: "FormSettings", icon: FileText },
+    { href: "/formSettings", label: "Form Settings", icon: FileText },
   ];
 
   return (
     <>
-      <nav className="bg-white/95 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100 shadow-sm transition-shadow">
+      <nav className="bg-white/95 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
 
             {/* LOGO */}
             <Link
               href="/"
-              className="flex items-center gap-2 text-2xl font-bold text-indigo-600 hover:text-indigo-700 transition-colors"
+              className="flex items-center gap-2 text-xl sm:text-2xl font-bold text-indigo-600 hover:text-indigo-700 transition-colors"
               onClick={closeMobileMenu}
             >
-              <div className="w-9 h-9 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-md">
-                <span className="text-white font-bold text-sm">G</span>
-              </div>
-              {/* <span className="hidden sm:inline">GoogleReviews</span> */}
+              <Image
+                src={logo}
+                alt="Logo"
+                width={36}
+                height={36}
+                className="w-8 h-8 sm:w-9 sm:h-9"
+              />
             </Link>
 
             {/* DESKTOP NAV */}
@@ -90,13 +95,13 @@ export default function Navbar() {
                     <Link
                       key={href}
                       href={href}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all ${
+                      className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl font-medium transition-all text-xs sm:text-sm ${
                         isActive(href)
                           ? "bg-indigo-50 text-indigo-700 shadow-sm"
                           : "text-gray-700 hover:text-indigo-600 hover:bg-gray-50"
                       }`}
                     >
-                      <Icon size={18} />
+                      <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
                       {label}
                     </Link>
                   ))}
@@ -108,12 +113,11 @@ export default function Navbar() {
                       className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-gray-50 transition-all"
                       aria-label="User menu"
                     >
-                      <div className="w-9 h-9 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-semibold text-sm shadow-md">
+                      <div className="w-8 h-8 sm:w-9 sm:h-9 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-semibold text-xs sm:text-sm shadow-md">
                         {user.email?.charAt(0).toUpperCase() || "U"}
                       </div>
                       <ChevronDown
-                        size={18}
-                        className={`text-gray-600 transition-transform ${
+                        className={`w-4 h-4 sm:w-5 sm:h-5 text-gray-600 transition-transform ${
                           isDropdownOpen ? "rotate-180" : ""
                         }`}
                       />
@@ -121,29 +125,31 @@ export default function Navbar() {
 
                     {/* DROPDOWN */}
                     {isDropdownOpen && (
-                      <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                      <div className="absolute right-0 mt-2 w-60 sm:w-64 bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
                         <div className="p-4 border-b border-gray-100 bg-gradient-to-r from-indigo-50 to-blue-50">
-                          <p className="font-semibold text-gray-900 truncate">{user.email}</p>
+                          <p className="font-semibold text-gray-900 truncate text-xs sm:text-sm">
+                            {user.email}
+                          </p>
                           <p className="text-xs text-indigo-600 mt-1 flex items-center gap-1">
-                            <CheckCircle size={14} />
+                            <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4" />
                             Signed in
                           </p>
                         </div>
 
                         <Link
                           href="/profile"
-                          className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-gray-700 transition-colors"
+                          className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-gray-700 transition-colors text-xs sm:text-sm"
                           onClick={() => setIsDropdownOpen(false)}
                         >
-                          <User size={18} className="text-gray-500" />
+                          <User className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" />
                           My Profile
                         </Link>
 
                         <button
                           onClick={handleLogout}
-                          className="flex items-center gap-3 px-4 py-3 hover:bg-red-50 text-red-600 w-full text-left transition-colors"
+                          className="flex items-center gap-3 px-4 py-3 hover:bg-red-50 text-red-600 w-full text-left transition-colors text-xs sm:text-sm"
                         >
-                          <LogOut size={18} />
+                          <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
                           Logout
                         </button>
                       </div>
@@ -154,13 +160,13 @@ export default function Navbar() {
                 <div className="flex items-center gap-3">
                   <Link
                     href="/login"
-                    className="text-gray-700 hover:text-indigo-600 font-medium px-4 py-2 rounded-xl transition-colors"
+                    className="text-gray-700 hover:text-indigo-600 font-medium px-4 py-2 rounded-xl transition-colors text-xs sm:text-sm"
                   >
                     Login
                   </Link>
                   <Link
                     href="/signup"
-                    className="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white px-5 py-2.5 rounded-xl font-medium shadow-md hover:shadow-lg transition-all"
+                    className="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white px-4 sm:px-5 py-2.5 rounded-xl font-medium shadow-md hover:shadow-lg transition-all text-xs sm:text-sm"
                   >
                     Sign Up
                   </Link>
@@ -174,7 +180,11 @@ export default function Navbar() {
               className="md:hidden p-2 rounded-xl text-gray-700 hover:bg-gray-100 transition-colors"
               aria-label="Toggle menu"
             >
-              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              {isMobileMenuOpen ? (
+                <X className="w-5 h-5 sm:w-6 sm:h-6" />
+              ) : (
+                <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
+              )}
             </button>
           </div>
         </div>
@@ -194,13 +204,13 @@ export default function Navbar() {
                     key={href}
                     href={href}
                     onClick={closeMobileMenu}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all ${
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all text-xs sm:text-sm ${
                       isActive(href)
                         ? "bg-indigo-100 text-indigo-700"
                         : "text-gray-700 hover:bg-white hover:shadow-sm"
                     }`}
                   >
-                    <Icon size={20} />
+                    <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
                     {label}
                   </Link>
                 ))}
@@ -208,24 +218,24 @@ export default function Navbar() {
                 <Link
                   href="/profile"
                   onClick={closeMobileMenu}
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-white hover:shadow-sm transition-all"
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-white hover:shadow-sm transition-all text-xs sm:text-sm"
                 >
-                  <User size={20} />
+                  <User className="w-4 h-4 sm:w-5 sm:h-5" />
                   My Profile
                 </Link>
 
                 <button
                   onClick={handleLogout}
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 w-full text-left font-medium transition-all"
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 w-full text-left font-medium transition-all text-xs sm:text-sm"
                 >
-                  <LogOut size={20} />
+                  <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
                   Logout
                 </button>
 
                 <div className="mt-3 pt-3 border-t border-gray-300">
-                  <p className="text-sm font-semibold text-gray-900 px-4">{user.email}</p>
+                  <p className="text-xs font-semibold text-gray-900 px-4">{user.email}</p>
                   <p className="text-xs text-indigo-600 px-4 mt-1 flex items-center gap-1">
-                    <CheckCircle size={14} />
+                    <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4" />
                     Signed in
                   </p>
                 </div>
@@ -235,14 +245,14 @@ export default function Navbar() {
                 <Link
                   href="/login"
                   onClick={closeMobileMenu}
-                  className="block text-center py-3 px-4 rounded-xl text-gray-700 hover:bg-white font-medium transition-all"
+                  className="block text-center py-3 px-4 rounded-xl text-gray-700 hover:bg-white font-medium transition-all text-xs sm:text-sm"
                 >
                   Login
                 </Link>
                 <Link
                   href="/signup"
                   onClick={closeMobileMenu}
-                  className="block text-center py-3 px-4 rounded-xl bg-gradient-to-r from-indigo-500 to-indigo-600 text-white font-medium shadow-md hover:shadow-lg transition-all"
+                  className="block text-center py-3 px-4 rounded-xl bg-gradient-to-r from-indigo-500 to-indigo-600 text-white font-medium shadow-md hover:shadow-lg transition-all text-xs sm:text-sm"
                 >
                   Sign Up
                 </Link>
