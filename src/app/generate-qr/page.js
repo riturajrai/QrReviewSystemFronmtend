@@ -35,7 +35,7 @@ function QRContent() {
   const [error, setError] = useState("");
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
-  const API_BASE = "http://localhost:5000/api";
+  const API_BASE = "https://qrreviewbackend.onrender.com/api";
 
   /* ------------------- Fetch Existing QR ------------------- */
   const fetchQR = async () => {
