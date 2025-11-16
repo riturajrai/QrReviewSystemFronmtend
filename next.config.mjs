@@ -1,10 +1,14 @@
-
+/** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  images: { domains: ['reviwes-backend.onrender.com'] },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "reviwes-backend.onrender.com",
+      },
+    ],
+  },
 };
+
 export default nextConfig;
-
-
-
-
