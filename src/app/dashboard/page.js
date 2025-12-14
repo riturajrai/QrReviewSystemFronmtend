@@ -29,13 +29,9 @@ const DashboardContent = () => {
   const [error, setError] = useState("");
   const [loadingStats, setLoadingStats] = useState(true);
 
-
-    useEffect(() => {
-    // Wait for AuthContext to load user
-    if (!loading && user) {
-      fetchDashboardStats();
-    }
-  }, [loading, user]);
+  useEffect(() => {
+    fetchDashboardStats();
+  }, []);
 
   const fetchDashboardStats = async () => {
     try {
