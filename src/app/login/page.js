@@ -79,7 +79,7 @@ export default function LoginPage() {
                   {...register("email")}
                   type="email"
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition text-xs sm:text-sm"
-                  placeholder="you@example.com"
+                  placeholder="Enter Your Email"
                 />
                 {errors.email && (
                   <p className="mt-1 text-xs text-red-600">{errors.email.message}</p>
