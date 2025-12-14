@@ -114,7 +114,7 @@ export default function SignupPage() {
                     {...register("email")}
                     type="email"
                     className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition text-xs sm:text-sm"
-                    placeholder="you@example.com"
+                    placeholder="Enter Your Email"
                   />
                   <EnvelopeIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400 pointer-events-none" />
                 </div>
@@ -214,4 +214,5 @@ export default function SignupPage() {
       </div>
     </>
   );
+
 }
