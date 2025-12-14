@@ -1,1 +1,9 @@
 @import "tailwindcss";
+
+
+/* Direct Tailwind ko extend karo - config file ki zarurat nahi! */
+@theme {
+  --color-primary: #006188;
+  --color-primary-dark: #004d70;
+  --color-primary-light: #0088b8;
+}

@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const instance = axios.create({
-  baseURL: "https://qrreviewbackend.onrender.com/api",
+  baseURL: "https://api.infravion.com/api",
   withCredentials: true, // IMPORTANT for cookies
 });
 

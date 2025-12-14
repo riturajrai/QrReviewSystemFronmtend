@@ -19,9 +19,9 @@ export default function FeedbackLanding() {
 
   const [form, setForm] = useState({ name: "", phone: "", message: "" });
   const [customURL, setCustomURL] = useState("");
-  const [companyName, setCompanyName] = useState(""); // NEW
+  const [companyName, setCompanyName] = useState("");
+  const [redirectFromRating, setRedirectFromRating] = useState(4);
 
-  // Enhanced rating labels
   const ratingLabels = {
     1: "Poor",
     2: "Fair",
@@ -30,7 +30,7 @@ export default function FeedbackLanding() {
     5: "Excellent",
   };
 
-  // Fetch custom URL + Company Name
+  // Fetch custom settings
   useEffect(() => {
     const fetchSettings = async () => {
       if (!qrId) return;
@@ -39,9 +39,12 @@ export default function FeedbackLanding() {
         if (data.success && data.data) {
           setCustomURL(data.data.url || "");
           setCompanyName(data.data.companyName || "Our Service");
+          setRedirectFromRating(data.data.redirectFromRating ?? 4);
         }
       } catch (err) {
-        console.log("No custom URL or company name found.");
+        console.log("No custom settings found. Using defaults.");
+        setCompanyName("Our Service");
+        setRedirectFromRating(4);
       }
     };
     fetchSettings();
@@ -55,7 +58,7 @@ export default function FeedbackLanding() {
       setTimeout(() => setIsExploding(false), 600);
     }
 
-    if (rating >= 4 && customURL) {
+    if (rating >= redirectFromRating && customURL) {
       setTimeout(() => {
         window.location.href = customURL;
       }, 800);
@@ -99,28 +102,26 @@ export default function FeedbackLanding() {
       }
     } catch (error) {
       console.error("Submit error:", error);
-      toast.error("Network error. Try again.");
+      toast.error("Network error. Please try again.");
     } finally {
       setSubmitting(false);
     }
   };
 
-  // Particle effect component for celebrations
   const ExplodingParticles = () => (
-    <div className="absolute inset-0 pointer-events-none">
+    <div className="absolute inset-0 pointer-events-none overflow-hidden">
       {[...Array(20)].map((_, i) => (
         <div
           key={i}
-          className={`absolute w-2 h-2 bg-yellow-400 rounded-full ${
+          className={`absolute w-2 h-2 sm:w-3 sm:h-3 bg-yellow-400 rounded-full ${
             isExploding ? "animate-explode" : ""
           }`}
           style={{
             left: "50%",
             top: "50%",
-            animationDelay: `${i * 0.1}s`,
-            transform: `translate(${
-              Math.random() * 200 - 100
-            }px, ${Math.random() * 200 - 100}px)`,
+            animationDelay: `${i * 0.05}s`,
+            "--tx": `${Math.random() * 300 - 150}px`,
+            "--ty": `${Math.random() * 300 - 150}px`,
           }}
         />
       ))}
@@ -129,51 +130,47 @@ export default function FeedbackLanding() {
 
   return (
     <>
-      <Toaster position="top-center" />
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center p-4">
-        <div className="text-center w-full max-w-sm sm:max-w-md">
+      <Toaster position="top-center" toastOptions={{ duration: 4000 }} />
 
-          {/* Company Name Title */}
-          <h2 className="text-xl font-bold text-indigo-700 mb-2">
-            {companyName ? companyName : "Our Company"}
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center p-4">
+        <div className="w-full max-w-md text-center">
+
+          {/* Company Name */}
+          <h2 className="text-xl font-bold text-indigo-700 mb-3">
+            {companyName}
           </h2>
 
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-lg font-bold text-gray-800 mb-6 leading-tight">
-              How was your experience with {companyName || "us"}?
+          {/* Main Card */}
+          <div className="bg-white rounded-3xl shadow-2xl p-6">
+            <h1 className="text-lg font-bold text-gray-800 mb-6">
+              How was your experience with {companyName}?
             </h1>
 
-            {/* Enhanced Star Rating */}
-            <div className="relative mb-4">
-              <div className="flex justify-center gap-1 sm:gap-2 mb-3">
+            {/* Star Rating */}
+            <div className="relative mb-6">
+              <div className="flex justify-center gap-3">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <button
                     key={star}
                     onClick={() => handleStarClick(star)}
                     onMouseEnter={() => handleStarHover(star)}
-                    onMouseLeave={() => handleStarHover(0)}
-                    className={`transition-all duration-200 transform hover:scale-110 ${
-                      selectedRating >= star ? "animate-bounce" : ""
-                    }`}
-                    style={{
-                      animationDelay:
-                        selectedRating >= star ? `${star * 0.1}s` : "0s",
-                    }}
+                    onMouseLeave={() => setHoveredRating(0)}
+                    onTouchStart={() => handleStarHover(star)}
+                    className="transition-all duration-300 transform hover:scale-110 active:scale-95 focus:outline-none"
                   >
-                    {hoveredRating >= star || selectedRating >= star ? (
-                      <StarIcon className="w-10 h-10 sm:w-12 sm:h-12 text-yellow-400 drop-shadow-lg" />
+                    {(hoveredRating >= star || selectedRating >= star) ? (
+                      <StarIcon className="w-10 h-10 text-yellow-400 drop-shadow-md" />
                     ) : (
-                      <StarOutline className="w-10 h-10 sm:w-12 sm:h-12 text-gray-300 hover:text-yellow-200" />
+                      <StarOutline className="w-10 h-10 text-gray-300 hover:text-yellow-300 transition-all duration-200" />
                     )}
                   </button>
                 ))}
               </div>
 
               {/* Rating Label */}
-              <div className="h-6">
+              <div className="mt-4 h-8">
                 {(hoveredRating > 0 || selectedRating > 0) && (
-                  <p className="text-gray-700 font-medium animate-fadeIn">
+                  <p className="text-base font-semibold text-gray-700 animate-fadeIn">
                     {ratingLabels[hoveredRating || selectedRating]}
                   </p>
                 )}
@@ -182,126 +179,123 @@ export default function FeedbackLanding() {
               {isExploding && <ExplodingParticles />}
             </div>
 
-            <p className="text-gray-600 leading-relaxed">
+            <p className="text-sm text-gray-600">
               Tap a star to rate your experience
             </p>
           </div>
 
           {/* Footer */}
-          <p className="text-gray-500 mt-12">
+          <p className="text-xs text-gray-500 mt-10">
             Powered by{" "}
-            <span className="font-semibold text-indigo-600">
-              VocalHeartInfoTech
-            </span>
+            <span className="font-bold text-indigo-600">VocalHeartInfoTech</span>
           </p>
         </div>
       </div>
 
       {/* Feedback Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-fadeIn">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 animate-scaleIn">
-            
-            {/* Modal Header */}
-            <div className="flex justify-between items-center mb-5">
-              <div>
-                <h3 className="text-lg font-bold text-gray-900">
-                  Share Your Feedback
-                </h3>
-                <p className="text-gray-600 mt-1">
-                  Help us improve your experience
-                </p>
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-end justify-center p-4 animate-fadeIn">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md max-h-[92vh] overflow-y-auto animate-scaleIn">
+            <div className="p-5">
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900">
+                    We Value Your Feedback
+                  </h3>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Help us improve our service
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="text-gray-400 hover:text-gray-700 text-2xl font-light"
+                  aria-label="Close"
+                >
+                  ×
+                </button>
               </div>
-              <button
-                onClick={() => setShowModal(false)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                ✕
-              </button>
-            </div>
 
-            {/* Rating Preview */}
-            <div className="flex items-center justify-center gap-3 mb-6 p-4 bg-gray-50 rounded-xl">
-              <div className="flex gap-1">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <StarIcon
-                    key={star}
-                    className={`w-8 h-8 ${
-                      star <= selectedRating
-                        ? "text-yellow-400 scale-110"
-                        : "text-gray-300"
-                    }`}
+              {/* Rating Preview */}
+              <div className="flex flex-col items-center gap-3 mb-6 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-2xl">
+                <div className="flex gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <StarIcon
+                      key={star}
+                      className={`w-8 h-8 ${
+                        star <= selectedRating
+                          ? "text-yellow-500"
+                          : "text-gray-300"
+                      }`}
+                    />
+                  ))}
+                </div>
+                <span className="text-base font-bold text-gray-800">
+                  {ratingLabels[selectedRating]}
+                </span>
+              </div>
+
+              {/* Form */}
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-gray-700 font-medium text-sm mb-1">
+                    Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    required
+                    type="text"
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    className="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-300 focus:border-indigo-500 outline-none"
+                    placeholder="Your full name"
                   />
-                ))}
-              </div>
-              <span className="text-gray-700 font-medium">
-                {ratingLabels[selectedRating]}
-              </span>
+                </div>
+
+                <div>
+                  <label className="block text-gray-700 font-medium text-sm mb-1">
+                    Phone <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    required
+                    type="tel"
+                    value={form.phone}
+                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                    className="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-300 focus:border-indigo-500 outline-none"
+                    placeholder="Your phone number"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-gray-700 font-medium text-sm mb-1">
+                    Message <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    required
+                    maxLength={300}
+                    rows={4}
+                    value={form.message}
+                    onChange={(e) => setForm({ ...form, message: e.target.value })}
+                    className="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-300 focus:border-indigo-500 outline-none resize-none"
+                    placeholder="Tell us how we can improve..."
+                  />
+                  <p className="text-right text-xs text-gray-500 mt-1">
+                    {form.message.length}/300
+                  </p>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="w-full bg-indigo-600 text-white py-3 rounded-lg font-medium text-sm hover:bg-indigo-700 disabled:opacity-70 transition"
+                >
+                  {submitting ? "Submitting..." : "Submit Feedback"}
+                </button>
+              </form>
             </div>
-
-            {/* Feedback Form */}
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-gray-700 mb-2 font-medium">
-                  Name *
-                </label>
-                <input
-                  required
-                  value={form.name}
-                  onChange={(e) =>
-                    setForm({ ...form, name: e.target.value })
-                  }
-                  className="w-full px-4 py-3 border rounded-lg"
-                  placeholder="Enter your full name"
-                />
-              </div>
-
-              <div>
-                <label className="block text-gray-700 mb-2 font-medium">
-                  Phone *
-                </label>
-                <input
-                  required
-                  type="tel"
-                  value={form.phone}
-                  onChange={(e) =>
-                    setForm({ ...form, phone: e.target.value })
-                  }
-                  className="w-full px-4 py-3 border rounded-lg"
-                  placeholder="Your phone number"
-                />
-              </div>
-
-              <div>
-                <label className="block text-gray-700 mb-2 font-medium">
-                  Message *
-                </label>
-                <textarea
-                  required
-                  maxLength={200}
-                  value={form.message}
-                  onChange={(e) =>
-                    setForm({ ...form, message: e.target.value })
-                  }
-                  rows={3}
-                  className="w-full px-4 py-3 border rounded-lg"
-                  placeholder="Write your feedback..."
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={submitting}
-                className="w-full bg-indigo-600 text-white py-3 rounded-lg font-medium hover:bg-indigo-700"
-              >
-                {submitting ? "Submitting..." : "Submit Feedback"}
-              </button>
-            </form>
           </div>
         </div>
       )}
 
-      {/* Animations */}
+      {/* Global Animations */}
       <style jsx global>{`
         @keyframes explode {
           0% {
@@ -328,7 +322,7 @@ export default function FeedbackLanding() {
         @keyframes scaleIn {
           from {
             opacity: 0;
-            transform: scale(0.9);
+            transform: scale(0.95);
           }
           to {
             opacity: 1;
@@ -337,15 +331,15 @@ export default function FeedbackLanding() {
         }
 
         .animate-explode {
-          animation: explode 0.6s ease-out forwards;
+          animation: explode 0.8s ease-out forwards;
         }
 
         .animate-fadeIn {
-          animation: fadeIn 0.3s ease-out;
+          animation: fadeIn 0.4s ease-out;
         }
 
         .animate-scaleIn {
-          animation: scaleIn 0.2s ease-out;
+          animation: scaleIn 0.3s ease-out;
         }
       `}</style>
     </>

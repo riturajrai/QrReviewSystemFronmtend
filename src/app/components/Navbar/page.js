@@ -19,9 +19,9 @@ import {
 } from "lucide-react";
 
 export default function Navbar() {
+
   const { user, logout } = useAuth();
   const pathname = usePathname();
-
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -56,7 +56,6 @@ export default function Navbar() {
   };
 
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
-
   const isActive = (path) => pathname === path;
 
   const navLinks = [
@@ -95,11 +94,10 @@ export default function Navbar() {
                     <Link
                       key={href}
                       href={href}
-                      className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl font-medium transition-all text-xs sm:text-sm ${
-                        isActive(href)
-                          ? "bg-indigo-50 text-indigo-700 shadow-sm"
-                          : "text-gray-700 hover:text-indigo-600 hover:bg-gray-50"
-                      }`}
+                      className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl font-medium transition-all text-xs sm:text-sm ${isActive(href)
+                        ? "bg-indigo-50 text-indigo-700 shadow-sm"
+                        : "text-gray-700 hover:text-indigo-600 hover:bg-gray-50"
+                        }`}
                     >
                       <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
                       {label}
@@ -117,9 +115,8 @@ export default function Navbar() {
                         {user.email?.charAt(0).toUpperCase() || "U"}
                       </div>
                       <ChevronDown
-                        className={`w-4 h-4 sm:w-5 sm:h-5 text-gray-600 transition-transform ${
-                          isDropdownOpen ? "rotate-180" : ""
-                        }`}
+                        className={`w-4 h-4 sm:w-5 sm:h-5 text-gray-600 transition-transform ${isDropdownOpen ? "rotate-180" : ""
+                          }`}
                       />
                     </button>
 
@@ -135,7 +132,6 @@ export default function Navbar() {
                             Signed in
                           </p>
                         </div>
-
                         <Link
                           href="/profile"
                           className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-gray-700 transition-colors text-xs sm:text-sm"
@@ -192,9 +188,8 @@ export default function Navbar() {
         {/* MOBILE MENU */}
         <div
           ref={mobileMenuRef}
-          className={`md:hidden transition-all duration-300 ease-in-out overflow-hidden ${
-            isMobileMenuOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
-          }`}
+          className={`md:hidden transition-all duration-300 ease-in-out overflow-hidden ${isMobileMenuOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
+            }`}
         >
           <div className="px-4 py-4 space-y-1 bg-gray-50/50 border-t border-gray-200">
             {user ? (
@@ -204,11 +199,10 @@ export default function Navbar() {
                     key={href}
                     href={href}
                     onClick={closeMobileMenu}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all text-xs sm:text-sm ${
-                      isActive(href)
-                        ? "bg-indigo-100 text-indigo-700"
-                        : "text-gray-700 hover:bg-white hover:shadow-sm"
-                    }`}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all text-xs sm:text-sm ${isActive(href)
+                      ? "bg-indigo-100 text-indigo-700"
+                      : "text-gray-700 hover:bg-white hover:shadow-sm"
+                      }`}
                   >
                     <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
                     {label}
@@ -231,7 +225,6 @@ export default function Navbar() {
                   <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
                   Logout
                 </button>
-
                 <div className="mt-3 pt-3 border-t border-gray-300">
                   <p className="text-xs font-semibold text-gray-900 px-4">{user.email}</p>
                   <p className="text-xs text-indigo-600 px-4 mt-1 flex items-center gap-1">
