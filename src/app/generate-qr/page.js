@@ -35,14 +35,14 @@ function QRContent() {
   const [customText, setCustomText] = useState("Scan for Feedback");
   const [textColor, setTextColor] = useState("#000000");
 
-  const API_BASE = "http://localhost:5000/api";
+
 
   /* ------------------- Fetch Existing QR ------------------- */
   const fetchQR = async () => {
     setFetching(true);
     setError("");
     try {
-      const { data } = await axios.get(`${API_BASE}/my-qr`, {
+      const { data } = await axios.get('/my-qr', {
         withCredentials: true,
       });
       setQr(data.success ? data.qr : null);
@@ -63,8 +63,7 @@ function QRContent() {
     setLoadingQR(true);
     setError("");
     try {
-      const { data } = await axios.post(
-        `${API_BASE}/generate-qr`,
+      const { data } = await axios.post('/generate-qr',
         {},
         { withCredentials: true }
       );
@@ -89,7 +88,7 @@ function QRContent() {
     setLoadingQR(true);
     setError("");
     try {
-      const { data } = await axios.delete(`${API_BASE}/delete-qr`, {
+      const { data } = await axios.delete('/delete-qr', {
         withCredentials: true,
       });
       if (data.success) {
