@@ -79,9 +79,7 @@ export default function SignupPage() {
             <h2 className="text-2xl sm:text-3xl font-bold text-center text-gray-900 mb-2">
               Create Account
             </h2>
-            <p className="text-center text-xs sm:text-sm text-gray-600 mb-6 sm:mb-8">
-              Join <span className="font-semibold text-indigo-600">GoogleReviewsPro</span> today
-            </p>
+            
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
               {/* Username */}
@@ -94,7 +92,7 @@ export default function SignupPage() {
                   <input
                     {...register("username")}
                     className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition text-xs sm:text-sm"
-                    placeholder="John Doe"
+                    placeholder="Enter Your Name"
                   />
                   <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400 pointer-events-none" />
                 </div>
@@ -180,10 +178,7 @@ export default function SignupPage() {
               </Link>
             </p>
 
-            <p className="mt-8 text-center text-xs text-gray-500">
-              Powered by{" "}
-              <span className="font-semibold text-indigo-600">GoogleReviewsPro</span>
-            </p>
+       
           </motion.div>
         </div>
 
@@ -214,5 +209,4 @@ export default function SignupPage() {
       </div>
     </>
   );
-
 }

@@ -5,7 +5,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
 import { useState, useRef, useEffect } from "react";
-import logo from "../../../../public/logo.png";
+import logo from "../../../../public/reviwist.png";
 import {
   ChevronDown,
   LogOut,
@@ -19,7 +19,6 @@ import {
 } from "lucide-react";
 
 export default function Navbar() {
-
   const { user, logout } = useAuth();
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -58,11 +57,20 @@ export default function Navbar() {
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
   const isActive = (path) => pathname === path;
 
-  const navLinks = [
+  // Private links for logged-in users
+  const privateLinks = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/generate-qr", label: "Generate QR", icon: QrCode },
     { href: "/submissions", label: "Submissions", icon: FileText },
     { href: "/formSettings", label: "Form Settings", icon: FileText },
+  ];
+
+  // Public links visible to everyone
+  const publicLinks = [
+    { href: "/", label: "Home" },
+    { href: "/about", label: "About" },
+    { href: "/features", label: "Features" },
+    { href: "/contact", label: "Contact" },
   ];
 
   return (
@@ -77,24 +85,33 @@ export default function Navbar() {
               className="flex items-center gap-2 text-xl sm:text-2xl font-bold text-indigo-600 hover:text-indigo-700 transition-colors"
               onClick={closeMobileMenu}
             >
-              <Image
-                src={logo}
-                alt="Logo"
-                width={36}
-                height={36}
-                className="w-8 h-8 sm:w-9 sm:h-9"
-              />
+              <Image src={logo} alt="Logo" width={80} height={80} />
             </Link>
 
             {/* DESKTOP NAV */}
             <div className="hidden md:flex items-center gap-1 lg:gap-2">
+              {/* Public Links */}
+              {publicLinks.map(({ href, label }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className={`px-3 py-2 rounded-xl font-medium text-xs sm:text-sm transition-colors ${isActive(href)
+                    ? "bg-indigo-50 text-indigo-700"
+                    : "text-gray-700 hover:text-indigo-600 hover:bg-gray-50"
+                    }`}
+                >
+                  {label}
+                </Link>
+              ))}
+
               {user ? (
                 <>
-                  {navLinks.map(({ href, label, icon: Icon }) => (
+                  {/* Private Links */}
+                  {privateLinks.map(({ href, label, icon: Icon }) => (
                     <Link
                       key={href}
                       href={href}
-                      className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl font-medium transition-all text-xs sm:text-sm ${isActive(href)
+                      className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl font-medium text-xs sm:text-sm transition-all ${isActive(href)
                         ? "bg-indigo-50 text-indigo-700 shadow-sm"
                         : "text-gray-700 hover:text-indigo-600 hover:bg-gray-50"
                         }`}
@@ -192,9 +209,25 @@ export default function Navbar() {
             }`}
         >
           <div className="px-4 py-4 space-y-1 bg-gray-50/50 border-t border-gray-200">
+            {/* Public Links */}
+            {publicLinks.map(({ href, label }) => (
+              <Link
+                key={href}
+                href={href}
+                onClick={closeMobileMenu}
+                className={`block px-4 py-3 rounded-xl text-xs sm:text-sm font-medium transition-colors ${isActive(href)
+                  ? "bg-indigo-100 text-indigo-700"
+                  : "text-gray-700 hover:bg-white hover:shadow-sm"
+                  }`}
+              >
+                {label}
+              </Link>
+            ))}
+
             {user ? (
               <>
-                {navLinks.map(({ href, label, icon: Icon }) => (
+                {/* Private Links */}
+                {privateLinks.map(({ href, label, icon: Icon }) => (
                   <Link
                     key={href}
                     href={href}
@@ -225,6 +258,7 @@ export default function Navbar() {
                   <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
                   Logout
                 </button>
+
                 <div className="mt-3 pt-3 border-t border-gray-300">
                   <p className="text-xs font-semibold text-gray-900 px-4">{user.email}</p>
                   <p className="text-xs text-indigo-600 px-4 mt-1 flex items-center gap-1">

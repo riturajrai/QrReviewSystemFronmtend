@@ -153,10 +153,7 @@ export default function LoginPage() {
             </div>
 
             {/* Footer */}
-            <p className="mt-8 text-center text-xs text-gray-500">
-              Powered by{" "}
-              <span className="font-semibold text-indigo-600">GoogleReviewsPro</span>
-            </p>
+           
           </div>
         </div>
       </div>
