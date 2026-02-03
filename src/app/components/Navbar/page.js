@@ -65,7 +65,7 @@ export default function Navbar() {
     { href: "/formSettings", label: "Form Settings", icon: FileText },
   ];
 
-  // Public links visible to everyone
+  // Public links visible only to non-logged-in users
   const publicLinks = [
     { href: "/", label: "Home" },
     { href: "/about", label: "About" },
@@ -90,8 +90,8 @@ export default function Navbar() {
 
             {/* DESKTOP NAV */}
             <div className="hidden md:flex items-center gap-1 lg:gap-2">
-              {/* Public Links */}
-              {publicLinks.map(({ href, label }) => (
+              {/* Public Links - only if not logged in */}
+              {!user && publicLinks.map(({ href, label }) => (
                 <Link
                   key={href}
                   href={href}
@@ -209,8 +209,8 @@ export default function Navbar() {
             }`}
         >
           <div className="px-4 py-4 space-y-1 bg-gray-50/50 border-t border-gray-200">
-            {/* Public Links */}
-            {publicLinks.map(({ href, label }) => (
+            {/* Public Links - only if not logged in */}
+            {!user && publicLinks.map(({ href, label }) => (
               <Link
                 key={href}
                 href={href}

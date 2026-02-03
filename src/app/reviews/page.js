@@ -11,7 +11,6 @@ export default function Reviews() {
     { id: "sample-reviews", label: "Sample Reviews" },
     { id: "testimonials", label: "Testimonials" }
   ];
-
   const HowItWorksContent = () => (
     <div className="space-y-8">
       <motion.h3

@@ -16,7 +16,6 @@ export default function FeedbackLanding() {
   const [hoveredRating, setHoveredRating] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [isExploding, setIsExploding] = useState(false);
-
   const [form, setForm] = useState({ name: "", phone: "", message: "" });
   const [customURL, setCustomURL] = useState("");
   const [companyName, setCompanyName] = useState("");
@@ -40,7 +39,7 @@ export default function FeedbackLanding() {
           setCustomURL(data.data.url || "");
           setCompanyName(data.data.companyName || "Our Service");
           setRedirectFromRating(data.data.redirectFromRating ?? 4);
-        }
+        };
       } catch (err) {
         console.log("No custom settings found. Using defaults.");
         setCompanyName("Our Service");
@@ -131,7 +130,6 @@ export default function FeedbackLanding() {
   return (
     <>
       <Toaster position="top-center" toastOptions={{ duration: 4000 }} />
-
       <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center p-4">
         <div className="w-full max-w-md text-center">
 
@@ -214,7 +212,6 @@ export default function FeedbackLanding() {
                   ×
                 </button>
               </div>
-
               {/* Rating Preview */}
               <div className="flex flex-col items-center gap-3 mb-6 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-2xl">
                 <div className="flex gap-1">

@@ -2,7 +2,6 @@
 "use client";
 import { motion } from "framer-motion";
 import Link from "next/link";
-
 export default function About() {
   return (
     <div className="min-h-screen bg-gray-50">
@@ -31,7 +30,7 @@ export default function About() {
           >
             Get Started Today
           </Link>
-        </div>
+        </div> 
       </section>
 
       {/* Company Story Section */}
@@ -43,8 +42,7 @@ export default function About() {
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8 }}
               viewport={{ once: true }}
-              className="space-y-6"
-            >
+              className="space-y-6">
               <h2 className="text-3xl font-bold text-gray-800">Our Story</h2>
               <p className="text-gray-600 leading-relaxed">
                 Founded in 2023, Review Us was born from the frustration of small business owners who struggled to collect and manage customer feedback effectively. Traditional review systems were either too complicated, too expensive, or simply didn't work well for mobile-first customers.
@@ -131,7 +129,6 @@ export default function About() {
           </div>
         </div>
       </section>
-
       {/* Values Section */}
       <section className="py-16 px-4 sm:px-6 bg-white">
         <div className="max-w-6xl mx-auto">
