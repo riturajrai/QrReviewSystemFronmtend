@@ -114,6 +114,10 @@ function QRContent() {
   };
   /* ------------------- Download QR ------------------- */
   const downloadQR = () => {
+    if (!qr?.imageUrl) {
+      alert("No QR image available.");
+      return;
+    }
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
     const qrImg = new Image();
@@ -207,12 +211,16 @@ function QRContent() {
     };
     qrImg.onerror = () => {
       console.error("Failed to load QR image.");
-      alert("Failed to load QR image.");
+      alert("Failed to load QR image. Please check if the QR code is generated correctly.");
     };
     qrImg.src = qr.imageUrl;
   };
   /* ------------------- Print QR ------------------- */
   const printQR = () => {
+    if (!qr?.imageUrl) {
+      alert("No QR image available.");
+      return;
+    }
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
     const qrImg = new Image();
@@ -233,6 +241,7 @@ function QRContent() {
           drawQRAndProceed();
         };
         frameImg.onerror = () => {
+          console.error("Failed to load frame image for print.");
           drawQRAndProceed();
         };
         frameImg.src = `/frames/frame-${selectedFrame}.png`;
@@ -272,6 +281,7 @@ function QRContent() {
             drawTextAndFinalize();
           };
           logoImg.onerror = () => {
+            console.error("Failed to load logo image for print.");
             drawTextAndFinalize();
           };
           logoImg.src = logoSrc;
@@ -287,19 +297,22 @@ function QRContent() {
           ctx.fillText(customText, canvas.width / 2, 430);
         }
         const dataUrl = canvas.toDataURL("image/png");
-        const win = window.open();
+        const win = window.open('', '_blank');
         if (win) {
           win.document.write(
-            '<img src="' + dataUrl + '" onload="window.print();window.close()" style="width:100%; height:auto;" />'
+            '<html><head><title>Print QR</title></head><body>' +
+            '<img src="' + dataUrl + '" style="width:100%; max-width:450px;" onload="window.print();window.close()" />' +
+            '</body></html>'
           );
           win.document.close();
         } else {
-          alert("Failed to open print window.");
+          alert("Failed to open print window. Please allow pop-ups.");
         }
       }
     };
     qrImg.onerror = () => {
-      alert("Failed to load QR image for print.");
+      console.error("Failed to load QR image for print.");
+      alert("Failed to load QR image for print. Please check if the QR code is generated correctly.");
     };
     qrImg.src = qr.imageUrl;
   };
@@ -358,17 +371,17 @@ function QRContent() {
     { name: "Vintage", border: "border-8 border-amber-700 rounded-3xl sepia" },
   ];
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 py-8 px-4">
-      <div className="max-w-2xl mx-auto text-center">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">My QR Code</h1>
-        <p className="text-lg text-gray-600 mb-8">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto text-center">
+        <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">My QR Code</h1>
+        <p className="text-lg sm:text-xl text-gray-600 mb-8">
           Generate and customize your feedback QR code
         </p>
         {/* Loading Skeleton */}
         {fetching && <QRSkeleton />}
         {/* No QR Yet */}
         {!fetching && !qr && (
-          <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
+          <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200">
             <QrCodeIcon className="w-24 h-24 text-gray-300 mx-auto mb-6" />
             <p className="text-xl text-gray-700 mb-6">
               You don't have a QR code yet.
@@ -392,13 +405,13 @@ function QRContent() {
           <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-xl border border-gray-200">
             {/* Preview */}
             <div className="mb-10 flex justify-center">
-              <div className="bg-white">
-                <div className={`p-6 sm:p-8 bg-white ${frames[selectedFrame].border} transition-all duration-300`}>
-                  <div className="relative w-64 h-64 mx-auto">
+              <div className="bg-white w-full max-w-xs sm:max-w-sm md:max-w-md">
+                <div className={`p-4 sm:p-6 md:p-8 bg-white ${frames[selectedFrame].border} transition-all duration-300`}>
+                  <div className="relative w-full aspect-square mx-auto">
                     <img
                       src={qr.imageUrl}
                       alt="Your QR Code"
-                      className="w-64 h-64"
+                      className="w-full h-full"
                       style={{
                         filter:
                           qrColor === "#000000"
@@ -411,13 +424,13 @@ function QRContent() {
                         src={logoSrc}
                         alt="Logo"
                         className="absolute object-contain"
-                        style={getLogoStyle(logoPosition, (logoSize / 260) * 256)}
+                        style={getLogoStyle(logoPosition, (logoSize / 260) * 100 + "%")}
                       />
                     )}
                   </div>
                 </div>
                 {customText && (
-                  <p className="mt-6 text-2xl sm:text-3xl font-bold" style={{ color: textColor }}>
+                  <p className="mt-6 text-xl sm:text-2xl md:text-3xl font-bold" style={{ color: textColor }}>
                     {customText}
                   </p>
                 )}
@@ -530,7 +543,7 @@ function QRContent() {
                 <p className="text-base font-semibold text-gray-700 mb-4 text-left">
                   Choose Frame Style
                 </p>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                   {frames.map((frame, index) => (
                     <button
                       key={index}
@@ -558,7 +571,7 @@ function QRContent() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
                 onClick={copyLink}
-                className="flex items-center justify-center gap-3 bg-indigo-600 text-white px-8 py-4 rounded-xl hover:bg-indigo-700 transition text-lg font-medium touch-manipulation"
+                className="flex items-center justify-center gap-3 bg-indigo-600 text-white px-6 sm:px-8 py-4 rounded-xl hover:bg-indigo-700 transition text-lg font-medium touch-manipulation"
               >
                 {copySuccess ? (
                   <>
@@ -574,14 +587,14 @@ function QRContent() {
               </button>
               <button
                 onClick={downloadQR}
-                className="flex items-center justify-center gap-3 bg-green-600 text-white px-8 py-4 rounded-xl hover:bg-green-700 transition text-lg font-medium touch-manipulation"
+                className="flex items-center justify-center gap-3 bg-green-600 text-white px-6 sm:px-8 py-4 rounded-xl hover:bg-green-700 transition text-lg font-medium touch-manipulation"
               >
                 <ArrowDownTrayIcon className="w-6 h-6" />
                 Download QR
               </button>
               <button
                 onClick={printQR}
-                className="flex items-center justify-center gap-3 bg-blue-600 text-white px-8 py-4 rounded-xl hover:bg-blue-700 transition text-lg font-medium touch-manipulation"
+                className="flex items-center justify-center gap-3 bg-blue-600 text-white px-6 sm:px-8 py-4 rounded-xl hover:bg-blue-700 transition text-lg font-medium touch-manipulation"
               >
                 <PrinterIcon className="w-6 h-6" />
                 Print QR
@@ -589,7 +602,7 @@ function QRContent() {
               <button
                 onClick={() => setShowDeleteDialog(true)}
                 disabled={loadingQR}
-                className="flex items-center justify-center gap-3 bg-red-600 text-white px-8 py-4 rounded-xl hover:bg-red-700 disabled:opacity-70 transition text-lg font-medium touch-manipulation"
+                className="flex items-center justify-center gap-3 bg-red-600 text-white px-6 sm:px-8 py-4 rounded-xl hover:bg-red-700 disabled:opacity-70 transition text-lg font-medium touch-manipulation"
               >
                 <TrashIcon className="w-6 h-6" />
                 Delete
@@ -657,8 +670,8 @@ function getHue(hex) {
   return h < 0 ? h + 360 : h;
 }
 const QRSkeleton = () => (
-  <div className="bg-white p-12 rounded-2xl shadow-lg border border-gray-200 animate-pulse">
-    <div className="w-80 h-80 bg-gray-200 mx-auto mb-8 rounded-2xl"></div>
+  <div className="bg-white p-8 sm:p-12 rounded-2xl shadow-lg border border-gray-200 animate-pulse">
+    <div className="w-full max-w-xs sm:max-w-sm md:max-w-md aspect-square bg-gray-200 mx-auto mb-8 rounded-2xl"></div>
     <div className="h-8 bg-gray-200 w-64 mx-auto rounded mb-4"></div>
     <div className="h-12 bg-gray-200 w-48 mx-auto rounded"></div>
   </div>
