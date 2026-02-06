@@ -12,6 +12,7 @@ import {
   BuildingOfficeIcon,
   LinkIcon,
   StarIcon,
+  PhotoIcon,
 } from "@heroicons/react/24/outline";
 import { StarIcon as StarSolidIcon } from "@heroicons/react/24/solid";
 
@@ -27,6 +28,8 @@ function SettingsContent() {
   const [customURL, setCustomURL] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [redirectFromRating, setRedirectFromRating] = useState(3);
+  const [logoUrl, setLogoUrl] = useState("");
+  const [logoFile, setLogoFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
@@ -45,6 +48,7 @@ function SettingsContent() {
           setCustomURL(data.data.url || "");
           setCompanyName(data.data.companyName || "");
           setRedirectFromRating(data.data.redirectFromRating ?? 3);
+          setLogoUrl(data.data.logoUrl || "");
         }
       } catch (err) {
         console.log("No custom settings found yet.");
@@ -55,6 +59,13 @@ function SettingsContent() {
 
     fetchCustomData();
   }, []);
+
+  const handleLogoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setLogoFile(file);
+    }
+  };
 
   const handleSaveOrUpdate = async () => {
     if (!customURL.trim()) {
@@ -71,6 +82,31 @@ function SettingsContent() {
     setErrorMsg("");
 
     try {
+      // Upload logo if a new file is selected
+      let newLogoUrl = logoUrl;
+      if (logoFile) {
+        const formData = new FormData();
+        formData.append("logo", logoFile);
+
+        const uploadResponse = await axios.post("/form/upload-logo", formData, {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+
+        if (uploadResponse.data.success) {
+          newLogoUrl = uploadResponse.data.data.logoUrl;
+          setLogoUrl(newLogoUrl);
+          setLogoFile(null); // Clear the file after upload
+        } else {
+          setErrorMsg(uploadResponse.data.message || "Logo upload failed");
+          setLoading(false);
+          return;
+        }
+      }
+
+      // Save or update custom settings (assuming logoUrl is handled separately in backend)
       const { data } = await axios.post(
         "/custom-url/set-url",
         {
@@ -106,6 +142,7 @@ function SettingsContent() {
         setCustomURL("");
         setCompanyName("");
         setRedirectFromRating(3);
+        setLogoUrl("");
         setSuccessMsg("Settings deleted successfully!");
         setTimeout(() => setSuccessMsg(""), 3000);
         setShowDeleteDialog(false);
@@ -138,27 +175,27 @@ function SettingsContent() {
   };
 
   return (
-    <div className="min-h-screen bg-white py-8 px-4 text-[10px] leading-tight">
+    <div className="min-h-screen bg-white py-8 px-4 text-[10px] leading-tight sm:px-6 lg:px-8">
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="font-bold text-gray-900 mb-2">Form Settings</h1>
-          <p className="text-gray-600">
-            Customize company name, redirect URL, and rating threshold
+          <h1 className="font-bold text-gray-900 mb-2 text-xl sm:text-2xl">Form Settings</h1>
+          <p className="text-gray-600 text-sm sm:text-base">
+            Customize company name, redirect URL, rating threshold, and logo
           </p>
         </div>
 
         <div className="bg-white rounded-lg shadow border border-gray-200">
           <div className="p-6">
             {/* Current Settings Display */}
-            {(customURL || companyName) ? (
+            {(customURL || companyName || logoUrl) ? (
               <div className="space-y-4 mb-6">
                 <div className="border-b border-gray-200 pb-4">
-                  <h2 className="font-semibold text-gray-800 mb-3">
+                  <h2 className="font-semibold text-gray-800 mb-3 text-base sm:text-lg">
                     Current Configuration
                   </h2>
 
                   {companyName && (
-                    <div className="flex items-center justify-between p-3 bg-indigo-50 rounded">
+                    <div className="flex items-center justify-between p-3 bg-indigo-50 rounded text-sm sm:text-base">
                       <div className="flex items-center gap-2">
                         <BuildingOfficeIcon className="w-5 h-5 text-indigo-600" />
                         <div>
@@ -176,7 +213,7 @@ function SettingsContent() {
                   )}
 
                   {customURL && (
-                    <div className="flex items-center justify-between p-3 bg-indigo-50 rounded mt-3">
+                    <div className="flex items-center justify-between p-3 bg-indigo-50 rounded mt-3 text-sm sm:text-base">
                       <div className="flex items-center gap-2">
                         <LinkIcon className="w-5 h-5 text-indigo-600" />
                         <div>
@@ -200,7 +237,29 @@ function SettingsContent() {
                     </div>
                   )}
 
-                  <div className="flex items-center justify-between p-3 bg-indigo-50 rounded mt-3">
+                  {logoUrl && (
+                    <div className="flex items-center justify-between p-3 bg-indigo-50 rounded mt-3 text-sm sm:text-base">
+                      <div className="flex items-center gap-2">
+                        <PhotoIcon className="w-5 h-5 text-indigo-600" />
+                        <div>
+                          <p className="font-medium text-gray-700">Logo</p>
+                          <img
+                            src={logoUrl}
+                            alt="Company Logo"
+                            className="w-20 h-auto mt-1"
+                          />
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setShowEditDialog(true)}
+                        className="text-indigo-600 hover:text-indigo-800"
+                      >
+                        <PencilIcon className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between p-3 bg-indigo-50 rounded mt-3 text-sm sm:text-base">
                     <div className="flex items-center gap-2">
                       <StarIcon className="w-5 h-5 text-indigo-600" />
                       <div>
@@ -220,9 +279,9 @@ function SettingsContent() {
             ) : (
               <div className="text-center py-12">
                 <div className="bg-gray-200 border-2 border-dashed rounded w-20 h-20 mx-auto mb-4" />
-                <p className="text-gray-500">No settings configured yet</p>
-                <p className="text-gray-400 mt-1">
-                  Add your company name and redirect URL to get started
+                <p className="text-gray-500 text-sm sm:text-base">No settings configured yet</p>
+                <p className="text-gray-400 mt-1 text-xs sm:text-sm">
+                  Add your company name, redirect URL, logo, and threshold to get started
                 </p>
               </div>
             )}
@@ -231,17 +290,17 @@ function SettingsContent() {
             <div className="flex flex-col sm:flex-row gap-3">
               <button
                 onClick={() => setShowEditDialog(true)}
-                className="flex-1 flex items-center justify-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded hover:bg-indigo-700 font-medium"
+                className="flex-1 flex items-center justify-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded hover:bg-indigo-700 font-medium text-sm sm:text-base"
               >
                 <PencilIcon className="w-4 h-4" />
-                {customURL || companyName ? "Edit Settings" : "Configure Settings"}
+                {customURL || companyName || logoUrl ? "Edit Settings" : "Configure Settings"}
               </button>
 
-              {(customURL || companyName) && (
+              {(customURL || companyName || logoUrl) && (
                 <button
                   onClick={() => setShowDeleteDialog(true)}
                   disabled={loading}
-                  className="flex-1 flex items-center justify-center gap-2 bg-red-600 text-white px-5 py-2.5 rounded hover:bg-red-700 disabled:opacity-70 font-medium"
+                  className="flex-1 flex items-center justify-center gap-2 bg-red-600 text-white px-5 py-2.5 rounded hover:bg-red-700 disabled:opacity-70 font-medium text-sm sm:text-base"
                 >
                   <TrashIcon className="w-4 h-4" />
                   Delete Settings
@@ -251,13 +310,13 @@ function SettingsContent() {
 
             {/* Messages */}
             {successMsg && (
-              <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded flex items-center gap-2">
+              <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded flex items-center gap-2 text-sm sm:text-base">
                 <CheckIcon className="w-5 h-5 text-green-600" />
                 <p className="text-green-800 font-medium">{successMsg}</p>
               </div>
             )}
             {errorMsg && (
-              <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded">
+              <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded text-sm sm:text-base">
                 <p className="text-red-800 font-medium">{errorMsg}</p>
               </div>
             )}
@@ -267,10 +326,10 @@ function SettingsContent() {
         {/* Edit Dialog */}
         {showEditDialog && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg shadow-2xl max-w-md w-full p-6">
+            <div className="bg-white rounded-lg shadow-2xl max-w-md w-full p-6 overflow-y-auto max-h-[90vh]">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="font-bold text-gray-900">
-                  {customURL || companyName ? "Edit" : "Add"} Settings
+                <h3 className="font-bold text-gray-900 text-lg sm:text-xl">
+                  {customURL || companyName || logoUrl ? "Edit" : "Add"} Settings
                 </h3>
                 <button
                   onClick={() => setShowEditDialog(false)}
@@ -280,7 +339,7 @@ function SettingsContent() {
                 </button>
               </div>
 
-              <div className="space-y-5">
+              <div className="space-y-5 text-sm sm:text-base">
                 <div>
                   <label className="block font-semibold text-gray-700 mb-1">
                     Company Name
@@ -307,8 +366,31 @@ function SettingsContent() {
                     className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 outline-none"
                     disabled={loading}
                   />
-                  <p className="text-gray-500 mt-1">
+                  <p className="text-gray-500 mt-1 text-xs sm:text-sm">
                     Users meeting the rating threshold will be redirected here
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-gray-700 mb-1">
+                    Company Logo
+                  </label>
+                  {logoUrl && (
+                    <img
+                      src={logoUrl}
+                      alt="Current Logo"
+                      className="w-32 h-auto mb-2"
+                    />
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleLogoChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 outline-none"
+                    disabled={loading}
+                  />
+                  <p className="text-gray-500 mt-1 text-xs sm:text-sm">
+                    Upload or update your company logo (JPEG, PNG, etc.)
                   </p>
                 </div>
 
@@ -331,7 +413,7 @@ function SettingsContent() {
                   <div className="mt-2 p-3 bg-gray-50 rounded">
                     {renderStars(redirectFromRating)}
                   </div>
-                  <p className="text-gray-500 mt-2">
+                  <p className="text-gray-500 mt-2 text-xs sm:text-sm">
                     Users rating <strong>{redirectFromRating}+ stars</strong> will be redirected to your URL. 
                     Lower ratings will go to the feedback form.
                   </p>
@@ -342,14 +424,14 @@ function SettingsContent() {
                 <button
                   onClick={() => setShowEditDialog(false)}
                   disabled={loading}
-                  className="px-5 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 font-medium"
+                  className="px-5 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 font-medium text-sm sm:text-base"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSaveOrUpdate}
                   disabled={loading}
-                  className="px-5 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 disabled:opacity-70 flex items-center gap-2 font-medium"
+                  className="px-5 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 disabled:opacity-70 flex items-center gap-2 font-medium text-sm sm:text-base"
                 >
                   {loading ? (
                     <>
@@ -375,21 +457,21 @@ function SettingsContent() {
               <div className="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <TrashIcon className="w-8 h-8 text-red-600" />
               </div>
-              <h3 className="font-bold text-gray-900 mb-3">Delete Settings?</h3>
-              <p className="text-gray-600 mb-6">
-                This will <span className="font-bold text-red-600">permanently remove</span> your company name, redirect URL, and rating threshold.
+              <h3 className="font-bold text-gray-900 mb-3 text-lg sm:text-xl">Delete Settings?</h3>
+              <p className="text-gray-600 mb-6 text-sm sm:text-base">
+                This will <span className="font-bold text-red-600">permanently remove</span> your company name, redirect URL, logo, and rating threshold.
               </p>
               <div className="flex gap-3 justify-center">
                 <button
                   onClick={() => setShowDeleteDialog(false)}
-                  className="px-5 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 font-medium"
+                  className="px-5 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 font-medium text-sm sm:text-base"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleDelete}
                   disabled={loading}
-                  className="px-5 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-70 flex items-center gap-2 font-medium"
+                  className="px-5 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-70 flex items-center gap-2 font-medium text-sm sm:text-base"
                 >
                   {loading ? (
                     <ArrowPathIcon className="w-4 h-4 animate-spin" />
