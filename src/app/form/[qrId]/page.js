@@ -150,9 +150,9 @@ export default function FeedbackLanding() {
               />
             )}
             <div className="relative z-10">
-              <h1 className="text-lg font-bold text-gray-800 mb-6">
+              <h2 className="text-lg font-bold text-gray-800 mb-6">
                 How was your experience with {companyName}?
-              </h1>
+              </h2>
 
               {/* Star Rating */}
               <div className="relative mb-6">
