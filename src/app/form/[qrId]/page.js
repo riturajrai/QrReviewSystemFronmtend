@@ -20,6 +20,7 @@ export default function FeedbackLanding() {
   const [customURL, setCustomURL] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [redirectFromRating, setRedirectFromRating] = useState(4);
+  const [logoUrl, setLogoUrl] = useState("");
 
   const ratingLabels = {
     1: "Poor",
@@ -39,7 +40,8 @@ export default function FeedbackLanding() {
           setCustomURL(data.data.url || "");
           setCompanyName(data.data.companyName || "Our Service");
           setRedirectFromRating(data.data.redirectFromRating ?? 4);
-        };
+          setLogoUrl(data.data.logoUrl || "");
+        }
       } catch (err) {
         console.log("No custom settings found. Using defaults.");
         setCompanyName("Our Service");
@@ -132,54 +134,63 @@ export default function FeedbackLanding() {
       <Toaster position="top-center" toastOptions={{ duration: 4000 }} />
       <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center p-4">
         <div className="w-full max-w-md text-center">
-
           {/* Company Name */}
           <h2 className="text-xl font-bold text-indigo-700 mb-3">
             {companyName}
           </h2>
 
           {/* Main Card */}
-          <div className="bg-white rounded-3xl shadow-2xl p-6">
-            <h1 className="text-lg font-bold text-gray-800 mb-6">
-              How was your experience with {companyName}?
-            </h1>
+          <div className="bg-white rounded-3xl shadow-2xl p-6 relative overflow-hidden">
+            {logoUrl && (
+              <div
+                className="absolute inset-0 bg-no-repeat bg-center bg-contain opacity-10 z-0"
+                style={{
+                  backgroundImage: `url(${logoUrl})`,
+                }}
+              />
+            )}
+            <div className="relative z-10">
+              <h1 className="text-lg font-bold text-gray-800 mb-6">
+                How was your experience with {companyName}?
+              </h1>
 
-            {/* Star Rating */}
-            <div className="relative mb-6">
-              <div className="flex justify-center gap-3">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    onClick={() => handleStarClick(star)}
-                    onMouseEnter={() => handleStarHover(star)}
-                    onMouseLeave={() => setHoveredRating(0)}
-                    onTouchStart={() => handleStarHover(star)}
-                    className="transition-all duration-300 transform hover:scale-110 active:scale-95 focus:outline-none"
-                  >
-                    {(hoveredRating >= star || selectedRating >= star) ? (
-                      <StarIcon className="w-10 h-10 text-yellow-400 drop-shadow-md" />
-                    ) : (
-                      <StarOutline className="w-10 h-10 text-gray-300 hover:text-yellow-300 transition-all duration-200" />
-                    )}
-                  </button>
-                ))}
+              {/* Star Rating */}
+              <div className="relative mb-6">
+                <div className="flex justify-center gap-3">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      onClick={() => handleStarClick(star)}
+                      onMouseEnter={() => handleStarHover(star)}
+                      onMouseLeave={() => setHoveredRating(0)}
+                      onTouchStart={() => handleStarHover(star)}
+                      className="transition-all duration-300 transform hover:scale-110 active:scale-95 focus:outline-none"
+                    >
+                      {(hoveredRating >= star || selectedRating >= star) ? (
+                        <StarIcon className="w-10 h-10 text-yellow-400 drop-shadow-md" />
+                      ) : (
+                        <StarOutline className="w-10 h-10 text-gray-300 hover:text-yellow-300 transition-all duration-200" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Rating Label */}
+                <div className="mt-4 h-8">
+                  {(hoveredRating > 0 || selectedRating > 0) && (
+                    <p className="text-base font-semibold text-gray-700 animate-fadeIn">
+                      {ratingLabels[hoveredRating || selectedRating]}
+                    </p>
+                  )}
+                </div>
+
+                {isExploding && <ExplodingParticles />}
               </div>
 
-              {/* Rating Label */}
-              <div className="mt-4 h-8">
-                {(hoveredRating > 0 || selectedRating > 0) && (
-                  <p className="text-base font-semibold text-gray-700 animate-fadeIn">
-                    {ratingLabels[hoveredRating || selectedRating]}
-                  </p>
-                )}
-              </div>
-
-              {isExploding && <ExplodingParticles />}
+              <p className="text-sm text-gray-600">
+                Tap a star to rate your experience
+              </p>
             </div>
-
-            <p className="text-sm text-gray-600">
-              Tap a star to rate your experience
-            </p>
           </div>
 
           {/* Footer */}
@@ -192,7 +203,7 @@ export default function FeedbackLanding() {
 
       {/* Feedback Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/70 z-50 flex items-end justify-center p-4 animate-fadeIn">
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-end justify-center p-4 animate-fadeIn sm:items-center">
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md max-h-[92vh] overflow-y-auto animate-scaleIn">
             <div className="p-5">
               <div className="flex justify-between items-start mb-4">
