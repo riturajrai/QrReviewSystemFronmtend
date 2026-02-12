@@ -133,15 +133,14 @@ export default function SubscribePage() {
     <div className="min-h-screen bg-white flex items-center justify-center px-4">
       <div className="w-full max-w-md bg-white border border-gray-200 rounded-2xl shadow-lg p-8 text-center">
         <h1 className="text-3xl font-bold text-black mb-2">
-          3-Day Trial Subscription
+          7-Day subscription
         </h1>
         <p className="text-gray-600 mb-6">
           Try our premium features for just ₹2
         </p>
-
         <div className="mb-6">
           <span className="text-4xl font-extrabold text-black">₹2</span>
-          <span className="text-gray-500 text-lg"> / 3 days</span>
+          <span className="text-gray-500 text-lg"> / 7 days</span>
         </div>
 
         <ul className="text-left text-gray-700 mb-6 space-y-2 text-sm">
