@@ -280,7 +280,7 @@ export default function SubscribePage() {
             {/* Header */}
             <div className="text-center mb-8">
               <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-3">
-                3-Day Trial
+                7-Day 
               </h1>
               <p className="text-gray-600">
                 Experience premium features at an incredible price
