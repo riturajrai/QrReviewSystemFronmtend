@@ -10,8 +10,11 @@ import {
   CheckIcon,
   ExclamationTriangleIcon,
   ArrowDownTrayIcon,
-  PrinterIcon,
+  BuildingOfficeIcon,
+  PhotoIcon,
+  StarIcon as StarOutlineIcon,
 } from "@heroicons/react/24/outline";
+import { StarIcon as StarSolidIcon } from "@heroicons/react/24/solid";
 
 export default function QRPage() {
   return (
@@ -30,6 +33,16 @@ function QRContent() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState(0);
 
+  // Form Settings States
+  const [companyName, setCompanyName] = useState("");
+  const [customURL, setCustomURL] = useState("");
+  const [redirectFromRating, setRedirectFromRating] = useState(3);
+  const [logoUrl, setLogoUrl] = useState("");
+  const [logoFile, setLogoFile] = useState(null);
+  const [settingsLoading, setSettingsLoading] = useState(false);
+  const [settingsSuccess, setSettingsSuccess] = useState("");
+  const [settingsError, setSettingsError] = useState("");
+
   // Customizations
   const [qrColor, setQrColor] = useState("#000000");
   const [backgroundColor, setBackgroundColor] = useState("#ffffff");
@@ -38,8 +51,6 @@ function QRContent() {
   const [logoSrc, setLogoSrc] = useState(null);
   const [logoSize, setLogoSize] = useState(80);
   const [logoPosition, setLogoPosition] = useState("above");
-  const [brandName, setBrandName] = useState("");
-  const [brandUrl, setBrandUrl] = useState("");
   const [headerText, setHeaderText] = useState("Share Your Feedback on Google!");
   const [footerText, setFooterText] = useState("We Value Your Opinion!");
   const [showStars, setShowStars] = useState(true);
@@ -52,6 +63,117 @@ function QRContent() {
   const [decorativeStars, setDecorativeStars] = useState(false);
   const [qrBorderRadius, setQrBorderRadius] = useState(20);
   const [showGoogleLogo, setShowGoogleLogo] = useState(true);
+
+  /* ------------------- Fetch Form Settings from API ------------------- */
+  const fetchFormSettings = async () => {
+    try {
+      const { data } = await axios.get("/custom-url/get-url", {
+        withCredentials: true,
+      });
+
+      if (data.success && data.data) {
+        setCompanyName(data.data.companyName || "");
+        setCustomURL(data.data.url || "");
+        setRedirectFromRating(data.data.redirectFromRating ?? 3);
+        setLogoUrl(data.data.logoUrl || "");
+        setLogoSrc(data.data.logoUrl || null);
+      }
+    } catch (err) {
+      console.log("No form settings found, using defaults");
+    }
+  };
+
+  /* ------------------- Save Form Settings ------------------- */
+  const handleSaveSettings = async () => {
+    if (!customURL.trim()) {
+      setSettingsError("Please enter a valid redirect URL");
+      return;
+    }
+    if (!companyName.trim()) {
+      setSettingsError("Please enter your company name");
+      return;
+    }
+
+    setSettingsLoading(true);
+    setSettingsSuccess("");
+    setSettingsError("");
+
+    try {
+      // Upload logo if a new file is selected
+      let newLogoUrl = logoUrl;
+      if (logoFile) {
+        const formData = new FormData();
+        formData.append("logo", logoFile);
+
+        const uploadResponse = await axios.post("/form/upload-logo", formData, {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+
+        if (uploadResponse.data.success) {
+          newLogoUrl = uploadResponse.data.data.logoUrl;
+          setLogoUrl(newLogoUrl);
+          setLogoSrc(newLogoUrl);
+          setLogoFile(null);
+        } else {
+          setSettingsError(uploadResponse.data.message || "Logo upload failed");
+          setSettingsLoading(false);
+          return;
+        }
+      }
+
+      // Save or update custom settings
+      const { data } = await axios.post(
+        "/custom-url/set-url",
+        {
+          url: customURL.trim(),
+          companyName: companyName.trim(),
+          redirectFromRating: Number(redirectFromRating),
+        },
+        { withCredentials: true }
+      );
+
+      if (data.success) {
+        setSettingsSuccess("Settings saved successfully!");
+        setTimeout(() => setSettingsSuccess(""), 3000);
+        await fetchFormSettings(); // Refresh settings
+      } else {
+        setSettingsError(data.message || "Failed to save settings");
+      }
+    } catch (err) {
+      setSettingsError(err.response?.data?.message || "Something went wrong");
+    } finally {
+      setSettingsLoading(false);
+    }
+  };
+
+  /* ------------------- Delete Form Settings ------------------- */
+  const handleDeleteSettings = async () => {
+    setSettingsLoading(true);
+    try {
+      const { data } = await axios.delete("/custom-url/delete-url", {
+        withCredentials: true,
+      });
+
+      if (data.success) {
+        setCustomURL("");
+        setCompanyName("");
+        setRedirectFromRating(3);
+        setLogoUrl("");
+        setLogoSrc(null);
+        setSettingsSuccess("Settings deleted successfully!");
+        setTimeout(() => setSettingsSuccess(""), 3000);
+      } else {
+        setSettingsError(data.message || "Failed to delete");
+      }
+    } catch (err) {
+      setSettingsError(err.response?.data?.message || "Something went wrong");
+    } finally {
+      setSettingsLoading(false);
+    }
+  };
 
   /* ------------------- Fetch Existing QR ------------------- */
   const fetchQR = async () => {
@@ -71,6 +193,7 @@ function QRContent() {
   };
 
   useEffect(() => {
+    fetchFormSettings();
     fetchQR();
   }, []);
 
@@ -96,17 +219,14 @@ function QRContent() {
     }
   };
 
-  const resetToDefaults = () => {
+  const resetToDefaults = async () => {
     setSelectedTemplate(0);
     setQrColor("#000000");
     setBackgroundColor("#ffffff");
     setCustomText("Scan the QR code to leave a review");
     setTextColor("#000000");
-    setLogoSrc(null);
     setLogoSize(80);
     setLogoPosition("above");
-    setBrandName("");
-    setBrandUrl("");
     setHeaderText("Share Your Feedback on Google!");
     setFooterText("We Value Your Opinion!");
     setShowStars(true);
@@ -119,6 +239,8 @@ function QRContent() {
     setDecorativeStars(false);
     setQrBorderRadius(20);
     setShowGoogleLogo(true);
+    
+    await fetchFormSettings();
   };
 
   /* ------------------- Delete QR ------------------- */
@@ -218,7 +340,6 @@ function QRContent() {
       function continueDrawing() {
         // Draw header text
         if (headerText) {
-          // Add text shadow for better readability
           ctx.shadowColor = "rgba(0, 0, 0, 0.15)";
           ctx.shadowBlur = 4;
           ctx.shadowOffsetX = 2;
@@ -247,7 +368,6 @@ function QRContent() {
             currentY += 90;
           });
           
-          // Reset shadow
           ctx.shadowColor = "transparent";
           ctx.shadowBlur = 0;
           ctx.shadowOffsetX = 0;
@@ -257,10 +377,10 @@ function QRContent() {
         }
 
         // Draw brand name if present
-        if (brandName) {
+        if (companyName) {
           ctx.fillStyle = textColor;
           ctx.font = "bold 56px Arial";
-          ctx.fillText(brandName, canvas.width / 2, currentY);
+          ctx.fillText(companyName, canvas.width / 2, currentY);
           currentY += 80;
         }
 
@@ -269,20 +389,17 @@ function QRContent() {
         const qrX = (canvas.width - qrSize) / 2;
         const qrY = currentY;
         
-        // Add shadow for QR box
         ctx.shadowColor = "rgba(0, 0, 0, 0.2)";
         ctx.shadowBlur = 25;
         ctx.shadowOffsetX = 0;
         ctx.shadowOffsetY = 10;
         
-        // White background for QR with rounded corners
         ctx.fillStyle = "#ffffff";
         ctx.save();
         roundRect(ctx, qrX - 40, qrY - 40, qrSize + 80, qrSize + 80, qrBorderRadius);
         ctx.fill();
         ctx.restore();
         
-        // Reset shadow
         ctx.shadowColor = "transparent";
         ctx.shadowBlur = 0;
         ctx.shadowOffsetX = 0;
@@ -303,7 +420,6 @@ function QRContent() {
             const logoX = (canvas.width - logoDisplaySize) / 2;
             const logoY = qrY + (qrSize - logoDisplaySize) / 2;
             
-            // White background for logo
             ctx.fillStyle = "#ffffff";
             ctx.beginPath();
             ctx.arc(logoX + logoDisplaySize/2, logoY + logoDisplaySize/2, logoDisplaySize/2 + 10, 0, Math.PI * 2);
@@ -370,24 +486,20 @@ function QRContent() {
             const buttonX = (canvas.width - buttonWidth) / 2;
             const buttonY = currentY;
             
-            // Button shadow
             ctx.shadowColor = "rgba(0, 0, 0, 0.25)";
             ctx.shadowBlur = 20;
             ctx.shadowOffsetX = 0;
             ctx.shadowOffsetY = 8;
             
-            // Button background
             ctx.fillStyle = buttonColor;
             roundRect(ctx, buttonX, buttonY, buttonWidth, buttonHeight, 55);
             ctx.fill();
             
-            // Reset shadow
             ctx.shadowColor = "transparent";
             ctx.shadowBlur = 0;
             ctx.shadowOffsetX = 0;
             ctx.shadowOffsetY = 0;
             
-            // Button text - smart color contrast
             const buttonTextColor = getContrastColor(buttonColor);
             ctx.fillStyle = buttonTextColor;
             ctx.font = "bold 48px Arial";
@@ -398,7 +510,6 @@ function QRContent() {
 
           // Draw footer text
           if (footerText) {
-            // Add text shadow
             ctx.shadowColor = "rgba(0, 0, 0, 0.15)";
             ctx.shadowBlur = 3;
             ctx.shadowOffsetX = 1;
@@ -428,20 +539,10 @@ function QRContent() {
               currentY += 65;
             });
             
-            // Reset shadow
             ctx.shadowColor = "transparent";
             ctx.shadowBlur = 0;
             ctx.shadowOffsetX = 0;
             ctx.shadowOffsetY = 0;
-            
-            currentY += 30;
-          }
-
-          // Draw brand URL
-          if (brandUrl) {
-            ctx.fillStyle = textColor;
-            ctx.font = "38px Arial";
-            ctx.fillText(brandUrl, canvas.width / 2, currentY);
           }
 
           // Convert to blob and download
@@ -474,7 +575,6 @@ function QRContent() {
     ctx.save();
     ctx.font = "bold 80px Arial";
     
-    // Draw "Google"
     const text = "Google";
     const colors = ["#4285F4", "#EA4335", "#FBBC04", "#4285F4", "#34A853", "#EA4335"];
     
@@ -505,7 +605,6 @@ function QRContent() {
 
   function drawDecorativeStars(ctx, width, height) {
     const positions = [
-      // Left side stars - top to bottom
       { x: 150, y: 450, size: 45, rotation: 0 },
       { x: 200, y: 550, size: 32, rotation: 15 },
       { x: 130, y: 630, size: 38, rotation: -20 },
@@ -513,8 +612,6 @@ function QRContent() {
       { x: 140, y: 880, size: 30, rotation: -15 },
       { x: 170, y: 1000, size: 40, rotation: 20 },
       { x: 120, y: 1120, size: 33, rotation: -25 },
-      
-      // Right side stars - top to bottom
       { x: width - 160, y: 500, size: 50, rotation: 10 },
       { x: width - 130, y: 620, size: 36, rotation: -15 },
       { x: width - 190, y: 730, size: 42, rotation: 25 },
@@ -560,7 +657,6 @@ function QRContent() {
     ctx.lineTo(cx, cy - outerRadius);
     ctx.closePath();
     
-    // Create gradient for stars
     const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
     gradient.addColorStop(0, "#FFF700");
     gradient.addColorStop(0.5, "#FFD700");
@@ -568,12 +664,10 @@ function QRContent() {
     ctx.fillStyle = gradient;
     ctx.fill();
     
-    // Add subtle glow
     ctx.shadowColor = "rgba(255, 215, 0, 0.6)";
     ctx.shadowBlur = 8;
     ctx.fill();
     
-    // Reset shadow
     ctx.shadowColor = "transparent";
     ctx.shadowBlur = 0;
   }
@@ -607,120 +701,23 @@ function QRContent() {
     return brightness > 155 ? '#000000' : '#ffffff';
   }
 
-  /* ------------------- Templates ------------------- */
+  /* ------------------- Templates (Only 5) ------------------- */
   const templates = [
     {
-      name: "Classic Elegance",
-      backgroundColor: "#f8f9fa",
+      name: "Professional Navy",
+      backgroundColor: "#023e8a",
       qrColor: "#000000",
-      textColor: "#1a1a1a",
-      headerText: "Share Your Feedback on Google!",
-      footerText: "We Value Your Opinion!",
+      textColor: "#caf0f8",
+      headerText: "Share Your Experience on Google",
+      footerText: "Your Opinion Matters to Us",
       customText: "Scan the QR code to leave a review",
       showStars: true,
       gradientBackground: false,
-      showButton: false,
-      decorativeStars: false,
-      qrBorderRadius: 20,
-      showGoogleLogo: true,
-    },
-    {
-      name: "Midnight Blue",
-      backgroundColor: "#000814",
-      qrColor: "#000000",
-      textColor: "#ffc300",
-      headerText: "Please Leave Us a Google Review!",
-      footerText: "Your Feedback Matters!",
-      customText: "",
-      showStars: true,
-      gradientBackground: false,
-      showButton: true,
-      buttonText: "Leave a Review",
-      buttonColor: "#ffc300",
-      decorativeStars: true,
-      qrBorderRadius: 25,
-      showGoogleLogo: true,
-    },
-    {
-      name: "Sunset Vibes",
-      gradientBackground: true,
-      gradientColor1: "#ff6b6b",
-      gradientColor2: "#feca57",
-      qrColor: "#000000",
-      textColor: "#ffffff",
-      headerText: "Love Our Service? Leave a Review!",
-      footerText: "Thank You! 🌟",
-      customText: "Scan the QR code to leave a review",
-      showStars: true,
-      showButton: true,
-      buttonText: "Rate Us Now",
-      buttonColor: "#ffffff",
-      decorativeStars: false,
-      qrBorderRadius: 30,
-      showGoogleLogo: true,
-    },
-    {
-      name: "Ocean Breeze",
-      gradientBackground: true,
-      gradientColor1: "#667eea",
-      gradientColor2: "#764ba2",
-      qrColor: "#000000",
-      textColor: "#ffffff",
-      headerText: "Share Your Experience!",
-      footerText: "We Appreciate Your Feedback!",
-      customText: "Scan to review",
-      showStars: true,
-      showButton: false,
-      decorativeStars: false,
-      qrBorderRadius: 25,
-      showGoogleLogo: true,
-    },
-    {
-      name: "Forest Green",
-      backgroundColor: "#2d6a4f",
-      qrColor: "#000000",
-      textColor: "#ffffff",
-      headerText: "Rate Your Experience on Google",
-      footerText: "Your Opinion Helps Us Grow 🌱",
-      customText: "Scan the QR code",
-      showStars: true,
       showButton: true,
       buttonText: "Leave Review",
-      buttonColor: "#95d5b2",
+      buttonColor: "#0096c7",
       decorativeStars: false,
-      qrBorderRadius: 20,
-      showGoogleLogo: true,
-    },
-    {
-      name: "Royal Purple",
-      gradientBackground: true,
-      gradientColor1: "#5f27cd",
-      gradientColor2: "#341f97",
-      qrColor: "#000000",
-      textColor: "#ffffff",
-      headerText: "We'd Love Your Feedback!",
-      footerText: "Thank You for Your Support! 💜",
-      customText: "Scan to leave a Google review",
-      showStars: true,
-      showButton: false,
-      decorativeStars: true,
-      qrBorderRadius: 30,
-      showGoogleLogo: true,
-    },
-    {
-      name: "Coral Sunset",
-      backgroundColor: "#ff6b6b",
-      qrColor: "#000000",
-      textColor: "#ffffff",
-      headerText: "Leave Us a Google Review!",
-      footerText: "Your Feedback is Valuable! ❤️",
-      customText: "Scan the QR code to review",
-      showStars: true,
-      showButton: true,
-      buttonText: "Write Review",
-      buttonColor: "#2d3436",
-      decorativeStars: false,
-      qrBorderRadius: 25,
+      qrBorderRadius: 18,
       showGoogleLogo: true,
     },
     {
@@ -739,20 +736,6 @@ function QRContent() {
       buttonColor: "#ffffff",
       decorativeStars: false,
       qrBorderRadius: 28,
-      showGoogleLogo: true,
-    },
-    {
-      name: "Fresh Mint",
-      backgroundColor: "#d8f3dc",
-      qrColor: "#1b4332",
-      textColor: "#1b4332",
-      headerText: "Share Your Feedback on Google!",
-      footerText: "We Value Every Review! 🌿",
-      customText: "Scan the QR code to leave a review",
-      showStars: true,
-      showButton: false,
-      decorativeStars: false,
-      qrBorderRadius: 20,
       showGoogleLogo: true,
     },
     {
@@ -788,24 +771,24 @@ function QRContent() {
       showGoogleLogo: true,
     },
     {
-      name: "Professional Navy",
-      backgroundColor: "#023e8a",
+      name: "Coral Sunset",
+      backgroundColor: "#ff6b6b",
       qrColor: "#000000",
-      textColor: "#caf0f8",
-      headerText: "Share Your Experience on Google",
-      footerText: "Your Opinion Matters to Us",
-      customText: "Scan the QR code to leave a review",
+      textColor: "#ffffff",
+      headerText: "Leave Us a Google Review!",
+      footerText: "Your Feedback is Valuable! ❤️",
+      customText: "Scan the QR code to review",
       showStars: true,
       showButton: true,
-      buttonText: "Leave Review",
-      buttonColor: "#0096c7",
+      buttonText: "Write Review",
+      buttonColor: "#2d3436",
       decorativeStars: false,
-      qrBorderRadius: 18,
+      qrBorderRadius: 25,
       showGoogleLogo: true,
     },
   ];
 
-  const handleTemplateSelect = (index) => {
+  const handleTemplateSelect = async (index) => {
     setSelectedTemplate(index);
     const template = templates[index];
     
@@ -825,6 +808,8 @@ function QRContent() {
     setShowGoogleLogo(template.showGoogleLogo !== false);
     if (template.gradientColor1) setGradientColor1(template.gradientColor1);
     if (template.gradientColor2) setGradientColor2(template.gradientColor2);
+    
+    await fetchFormSettings();
   };
 
   const getBackgroundStyle = () => {
@@ -836,6 +821,34 @@ function QRContent() {
     return {
       backgroundColor: backgroundColor
     };
+  };
+
+  const handleLogoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setLogoFile(file);
+      const reader = new FileReader();
+      reader.onload = (ev) => setLogoSrc(ev.target.result);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const renderStars = (threshold) => {
+    return (
+      <div className="flex items-center gap-1">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <StarSolidIcon
+            key={star}
+            className={`w-4 h-4 ${
+              star <= threshold ? "text-indigo-600" : "text-gray-300"
+            }`}
+          />
+        ))}
+        <span className="ml-2 text-gray-600 text-sm">
+          {threshold === 1 ? "all ratings" : threshold === 5 ? "only" : "and above"}
+        </span>
+      </div>
+    );
   };
 
   return (
@@ -879,7 +892,7 @@ function QRContent() {
             {/* Template Selector */}
             <div className="bg-white p-6 rounded-2xl shadow-xl border border-gray-200 mb-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Choose a Template</h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
                 {templates.map((template, index) => (
                   <button
                     key={index}
@@ -927,7 +940,6 @@ function QRContent() {
                     {/* Decorative Stars */}
                     {decorativeStars && (
                       <>
-                        {/* Left side stars */}
                         <div className="absolute top-20 left-4">
                           <svg className="w-9 h-9" fill="url(#starGradient1)" viewBox="0 0 24 24">
                             <defs>
@@ -950,39 +962,12 @@ function QRContent() {
                             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                           </svg>
                         </div>
-                        <div className="absolute top-48 left-5" style={{ transform: 'rotate(25deg)' }}>
-                          <svg className="w-7 h-7" fill="#FFD700" viewBox="0 0 24 24">
-                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                          </svg>
-                        </div>
-                        
-                        {/* Right side stars */}
                         <div className="absolute top-32 right-4" style={{ transform: 'rotate(10deg)' }}>
                           <svg className="w-10 h-10" fill="#FFD700" viewBox="0 0 24 24">
                             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                           </svg>
                         </div>
                         <div className="absolute top-40 right-3" style={{ transform: 'rotate(-15deg)' }}>
-                          <svg className="w-7 h-7" fill="#FFD700" viewBox="0 0 24 24">
-                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                          </svg>
-                        </div>
-                        <div className="absolute top-52 right-6" style={{ transform: 'rotate(20deg)' }}>
-                          <svg className="w-8 h-8" fill="#FFD700" viewBox="0 0 24 24">
-                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                          </svg>
-                        </div>
-                        <div className="absolute bottom-48 left-4" style={{ transform: 'rotate(-25deg)' }}>
-                          <svg className="w-8 h-8" fill="#FFD700" viewBox="0 0 24 24">
-                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                          </svg>
-                        </div>
-                        <div className="absolute bottom-56 left-7" style={{ transform: 'rotate(15deg)' }}>
-                          <svg className="w-6 h-6" fill="#FFD700" viewBox="0 0 24 24">
-                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                          </svg>
-                        </div>
-                        <div className="absolute bottom-52 right-5" style={{ transform: 'rotate(-30deg)' }}>
                           <svg className="w-7 h-7" fill="#FFD700" viewBox="0 0 24 24">
                             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                           </svg>
@@ -1027,12 +1012,12 @@ function QRContent() {
                     )}
 
                     {/* Brand Name */}
-                    {brandName && (
+                    {companyName && (
                       <p 
                         className="text-lg sm:text-xl font-bold text-center mb-6 relative z-10"
                         style={{ color: textColor }}
                       >
-                        {brandName}
+                        {companyName}
                       </p>
                     )}
 
@@ -1110,20 +1095,10 @@ function QRContent() {
                     {/* Footer Text */}
                     {footerText && (
                       <p 
-                        className="text-lg sm:text-xl font-bold text-center mb-4 relative z-10"
+                        className="text-lg sm:text-xl font-bold text-center relative z-10"
                         style={{ color: textColor }}
                       >
                         {footerText}
-                      </p>
-                    )}
-
-                    {/* Brand URL */}
-                    {brandUrl && (
-                      <p 
-                        className="text-sm sm:text-base text-center relative z-10"
-                        style={{ color: textColor }}
-                      >
-                        {brandUrl}
                       </p>
                     )}
                   </div>
@@ -1135,310 +1110,378 @@ function QRContent() {
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">Customize</h2>
                 
                 <div className="space-y-6 max-h-[700px] overflow-y-auto pr-2">
-                  {/* Header Text */}
-                  <div>
-                    <label className="block text-base font-semibold text-gray-700 mb-3">
-                      Header Text
-                    </label>
-                    <input
-                      type="text"
-                      value={headerText}
-                      onChange={(e) => setHeaderText(e.target.value)}
-                      placeholder="e.g. Share Your Feedback on Google!"
-                      className="w-full px-4 py-3 text-base border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-300"
-                    />
-                  </div>
+                  {/* Form Settings Section */}
+                  <div className="border-b border-gray-200 pb-6">
+                    <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                      <BuildingOfficeIcon className="w-5 h-5 text-indigo-600" />
+                      Form Settings
+                    </h3>
 
-                  {/* Custom Text */}
-                  <div>
-                    <label className="block text-base font-semibold text-gray-700 mb-3">
-                      Text Below QR
-                    </label>
-                    <input
-                      type="text"
-                      value={customText}
-                      onChange={(e) => setCustomText(e.target.value)}
-                      placeholder="e.g. Scan the QR code to leave a review"
-                      className="w-full px-4 py-3 text-base border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-300"
-                    />
-                  </div>
-
-                  {/* Footer Text */}
-                  <div>
-                    <label className="block text-base font-semibold text-gray-700 mb-3">
-                      Footer Text
-                    </label>
-                    <input
-                      type="text"
-                      value={footerText}
-                      onChange={(e) => setFooterText(e.target.value)}
-                      placeholder="e.g. We Value Your Opinion!"
-                      className="w-full px-4 py-3 text-base border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-300"
-                    />
-                  </div>
-
-                  {/* Brand Name */}
-                  <div>
-                    <label className="block text-base font-semibold text-gray-700 mb-3">
-                      Brand Name (optional)
-                    </label>
-                    <input
-                      type="text"
-                      value={brandName}
-                      onChange={(e) => setBrandName(e.target.value)}
-                      placeholder="e.g. My Business"
-                      className="w-full px-4 py-3 text-base border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-300"
-                    />
-                  </div>
-
-                  {/* Brand URL */}
-                  <div>
-                    <label className="block text-base font-semibold text-gray-700 mb-3">
-                      Brand URL (optional)
-                    </label>
-                    <input
-                      type="text"
-                      value={brandUrl}
-                      onChange={(e) => setBrandUrl(e.target.value)}
-                      placeholder="e.g. www.mybusiness.com"
-                      className="w-full px-4 py-3 text-base border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-300"
-                    />
-                  </div>
-
-                  {/* Toggles */}
-                  <div className="space-y-3">
-                    <label className="flex items-center gap-3">
-                      <input
-                        type="checkbox"
-                        checked={showGoogleLogo}
-                        onChange={(e) => setShowGoogleLogo(e.target.checked)}
-                        className="w-5 h-5 rounded"
-                      />
-                      <span className="text-base font-semibold text-gray-700">
-                        Show Google Logo
-                      </span>
-                    </label>
-
-                    <label className="flex items-center gap-3">
-                      <input
-                        type="checkbox"
-                        checked={showStars}
-                        onChange={(e) => setShowStars(e.target.checked)}
-                        className="w-5 h-5 rounded"
-                      />
-                      <span className="text-base font-semibold text-gray-700">
-                        Show Star Rating
-                      </span>
-                    </label>
-
-                    <label className="flex items-center gap-3">
-                      <input
-                        type="checkbox"
-                        checked={decorativeStars}
-                        onChange={(e) => setDecorativeStars(e.target.checked)}
-                        className="w-5 h-5 rounded"
-                      />
-                      <span className="text-base font-semibold text-gray-700">
-                        Show Decorative Stars
-                      </span>
-                    </label>
-
-                    <label className="flex items-center gap-3">
-                      <input
-                        type="checkbox"
-                        checked={showButton}
-                        onChange={(e) => setShowButton(e.target.checked)}
-                        className="w-5 h-5 rounded"
-                      />
-                      <span className="text-base font-semibold text-gray-700">
-                        Show Call-to-Action Button
-                      </span>
-                    </label>
-
-                    <label className="flex items-center gap-3">
-                      <input
-                        type="checkbox"
-                        checked={gradientBackground}
-                        onChange={(e) => setGradientBackground(e.target.checked)}
-                        className="w-5 h-5 rounded"
-                      />
-                      <span className="text-base font-semibold text-gray-700">
-                        Use Gradient Background
-                      </span>
-                    </label>
-                  </div>
-
-                  {/* Button Customization */}
-                  {showButton && (
-                    <>
-                      <div>
-                        <label className="block text-base font-semibold text-gray-700 mb-3">
-                          Button Text
-                        </label>
-                        <input
-                          type="text"
-                          value={buttonText}
-                          onChange={(e) => setButtonText(e.target.value)}
-                          placeholder="e.g. Leave a Review"
-                          className="w-full px-4 py-3 text-base border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-300"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-base font-semibold text-gray-700 mb-3">
-                          Button Color
-                        </label>
-                        <input
-                          type="color"
-                          value={buttonColor}
-                          onChange={(e) => setButtonColor(e.target.value)}
-                          className="w-24 h-14 border-2 border-gray-300 rounded-xl cursor-pointer"
-                        />
-                      </div>
-                    </>
-                  )}
-
-                  {/* Background Colors */}
-                  {gradientBackground ? (
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-base font-semibold text-gray-700 mb-3">
-                          Gradient Start
-                        </label>
-                        <input
-                          type="color"
-                          value={gradientColor1}
-                          onChange={(e) => setGradientColor1(e.target.value)}
-                          className="w-full h-14 border-2 border-gray-300 rounded-xl cursor-pointer"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-base font-semibold text-gray-700 mb-3">
-                          Gradient End
-                        </label>
-                        <input
-                          type="color"
-                          value={gradientColor2}
-                          onChange={(e) => setGradientColor2(e.target.value)}
-                          className="w-full h-14 border-2 border-gray-300 rounded-xl cursor-pointer"
-                        />
-                      </div>
-                    </div>
-                  ) : (
-                    <div>
-                      <label className="block text-base font-semibold text-gray-700 mb-3">
-                        Background Color
+                    {/* Company Name */}
+                    <div className="mb-4">
+                      <label className="block text-base font-semibold text-gray-700 mb-2">
+                        Company Name
                       </label>
                       <input
-                        type="color"
-                        value={backgroundColor}
-                        onChange={(e) => setBackgroundColor(e.target.value)}
-                        className="w-24 h-14 border-2 border-gray-300 rounded-xl cursor-pointer"
+                        type="text"
+                        value={companyName}
+                        onChange={(e) => setCompanyName(e.target.value)}
+                        placeholder="e.g., ABC Restaurant"
+                        className="w-full px-4 py-3 text-base border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-300"
                       />
                     </div>
-                  )}
 
-                  {/* QR & Text Colors */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-base font-semibold text-gray-700 mb-3">
-                        Text Color
+                    {/* Redirect URL */}
+                    <div className="mb-4">
+                      <label className="block text-base font-semibold text-gray-700 mb-2">
+                        Redirect URL
                       </label>
                       <input
-                        type="color"
-                        value={textColor}
-                        onChange={(e) => setTextColor(e.target.value)}
-                        className="w-full h-14 border-2 border-gray-300 rounded-xl cursor-pointer"
+                        type="url"
+                        value={customURL}
+                        onChange={(e) => setCustomURL(e.target.value)}
+                        placeholder="https://yourwebsite.com/thank-you"
+                        className="w-full px-4 py-3 text-base border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-300"
                       />
+                      <p className="text-sm text-gray-500 mt-1">
+                        Users meeting the rating threshold will be redirected here
+                      </p>
                     </div>
-                    <div>
-                      <label className="block text-base font-semibold text-gray-700 mb-3">
-                        QR Code Color
+
+                    {/* Logo Upload */}
+                    <div className="mb-4">
+                      <label className="block text-base font-semibold text-gray-700 mb-2">
+                        Company Logo
                       </label>
+                      {logoSrc && (
+                        <img
+                          src={logoSrc}
+                          alt="Current Logo"
+                          className="w-24 h-24 object-contain rounded-lg border border-gray-300 mb-2"
+                        />
+                      )}
                       <input
-                        type="color"
-                        value={qrColor}
-                        onChange={(e) => setQrColor(e.target.value)}
-                        className="w-full h-14 border-2 border-gray-300 rounded-xl cursor-pointer"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleLogoChange}
+                        className="w-full px-4 py-3 text-base border border-gray-300 rounded-xl"
                       />
                     </div>
-                  </div>
 
-                  {/* QR Border Radius */}
-                  <div>
-                    <label className="block text-base font-semibold text-gray-700 mb-3">
-                      QR Corner Roundness: {qrBorderRadius}px
-                    </label>
-                    <input
-                      type="range"
-                      min={0}
-                      max={40}
-                      value={qrBorderRadius}
-                      onChange={(e) => setQrBorderRadius(Number(e.target.value))}
-                      className="w-full"
-                    />
-                  </div>
-
-                  {/* Logo Upload */}
-                  <div>
-                    <label className="block text-base font-semibold text-gray-700 mb-3">
-                      Add Logo (optional)
-                    </label>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files[0];
-                        if (file) {
-                          const reader = new FileReader();
-                          reader.onload = (ev) => setLogoSrc(ev.target.result);
-                          reader.readAsDataURL(file);
-                        }
-                      }}
-                      className="w-full px-4 py-3 text-base border border-gray-300 rounded-xl"
-                    />
-                    {logoSrc && (
-                      <button
-                        onClick={() => setLogoSrc(null)}
-                        className="mt-2 text-red-600 font-medium hover:text-red-700"
+                    {/* Redirect Threshold */}
+                    <div className="mb-4">
+                      <label className="block text-base font-semibold text-gray-700 mb-2">
+                        Redirect Threshold
+                      </label>
+                      <select
+                        value={redirectFromRating}
+                        onChange={(e) => setRedirectFromRating(Number(e.target.value))}
+                        className="w-full px-4 py-3 text-base border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-300"
                       >
-                        Remove Logo
+                        <option value={1}>1 star and above (all ratings)</option>
+                        <option value={2}>2 stars and above</option>
+                        <option value={3}>3 stars and above</option>
+                        <option value={4}>4 stars and above</option>
+                        <option value={5}>5 stars only</option>
+                      </select>
+                      <div className="mt-2 p-3 bg-gray-50 rounded-xl">
+                        {renderStars(redirectFromRating)}
+                      </div>
+                    </div>
+
+                    {/* Save/Delete Settings Buttons */}
+                    <div className="flex gap-3">
+                      <button
+                        onClick={handleSaveSettings}
+                        disabled={settingsLoading}
+                        className="flex-1 flex items-center justify-center gap-2 bg-indigo-600 text-white px-4 py-3 rounded-xl hover:bg-indigo-700 disabled:opacity-70 font-medium"
+                      >
+                        {settingsLoading ? (
+                          <ArrowPathIcon className="w-5 h-5 animate-spin" />
+                        ) : (
+                          <CheckIcon className="w-5 h-5" />
+                        )}
+                        {settingsLoading ? "Saving..." : "Save Settings"}
                       </button>
+
+                      {(companyName || customURL || logoUrl) && (
+                        <button
+                          onClick={handleDeleteSettings}
+                          disabled={settingsLoading}
+                          className="flex items-center justify-center gap-2 bg-red-600 text-white px-4 py-3 rounded-xl hover:bg-red-700 disabled:opacity-70 font-medium"
+                        >
+                          <TrashIcon className="w-5 h-5" />
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Settings Messages */}
+                    {settingsSuccess && (
+                      <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-xl flex items-center gap-2">
+                        <CheckIcon className="w-5 h-5 text-green-600" />
+                        <p className="text-green-800 font-medium text-sm">{settingsSuccess}</p>
+                      </div>
+                    )}
+                    {settingsError && (
+                      <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-xl">
+                        <p className="text-red-800 font-medium text-sm">{settingsError}</p>
+                      </div>
                     )}
                   </div>
 
-                  {/* Logo Controls */}
-                  {logoSrc && (
-                    <>
-                      <div>
-                        <label className="block text-base font-semibold text-gray-700 mb-3">
-                          Logo Size: {logoSize}px
+                  {/* QR Customization Section */}
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-800 mb-4">QR Customization</h3>
+
+                    {/* Header Text */}
+                    <div className="mb-4">
+                      <label className="block text-base font-semibold text-gray-700 mb-2">
+                        Header Text
+                      </label>
+                      <input
+                        type="text"
+                        value={headerText}
+                        onChange={(e) => setHeaderText(e.target.value)}
+                        placeholder="e.g. Share Your Feedback on Google!"
+                        className="w-full px-4 py-3 text-base border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-300"
+                      />
+                    </div>
+
+                    {/* Custom Text */}
+                    <div className="mb-4">
+                      <label className="block text-base font-semibold text-gray-700 mb-2">
+                        Text Below QR
+                      </label>
+                      <input
+                        type="text"
+                        value={customText}
+                        onChange={(e) => setCustomText(e.target.value)}
+                        placeholder="e.g. Scan the QR code to leave a review"
+                        className="w-full px-4 py-3 text-base border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-300"
+                      />
+                    </div>
+
+                    {/* Footer Text */}
+                    <div className="mb-4">
+                      <label className="block text-base font-semibold text-gray-700 mb-2">
+                        Footer Text
+                      </label>
+                      <input
+                        type="text"
+                        value={footerText}
+                        onChange={(e) => setFooterText(e.target.value)}
+                        placeholder="e.g. We Value Your Opinion!"
+                        className="w-full px-4 py-3 text-base border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-300"
+                      />
+                    </div>
+
+                    {/* Toggles */}
+                    <div className="space-y-3 mb-4">
+                      <label className="flex items-center gap-3">
+                        <input
+                          type="checkbox"
+                          checked={showGoogleLogo}
+                          onChange={(e) => setShowGoogleLogo(e.target.checked)}
+                          className="w-5 h-5 rounded"
+                        />
+                        <span className="text-base font-semibold text-gray-700">
+                          Show Google Logo
+                        </span>
+                      </label>
+
+                      <label className="flex items-center gap-3">
+                        <input
+                          type="checkbox"
+                          checked={showStars}
+                          onChange={(e) => setShowStars(e.target.checked)}
+                          className="w-5 h-5 rounded"
+                        />
+                        <span className="text-base font-semibold text-gray-700">
+                          Show Star Rating
+                        </span>
+                      </label>
+
+                      <label className="flex items-center gap-3">
+                        <input
+                          type="checkbox"
+                          checked={decorativeStars}
+                          onChange={(e) => setDecorativeStars(e.target.checked)}
+                          className="w-5 h-5 rounded"
+                        />
+                        <span className="text-base font-semibold text-gray-700">
+                          Show Decorative Stars
+                        </span>
+                      </label>
+
+                      <label className="flex items-center gap-3">
+                        <input
+                          type="checkbox"
+                          checked={showButton}
+                          onChange={(e) => setShowButton(e.target.checked)}
+                          className="w-5 h-5 rounded"
+                        />
+                        <span className="text-base font-semibold text-gray-700">
+                          Show Call-to-Action Button
+                        </span>
+                      </label>
+
+                      <label className="flex items-center gap-3">
+                        <input
+                          type="checkbox"
+                          checked={gradientBackground}
+                          onChange={(e) => setGradientBackground(e.target.checked)}
+                          className="w-5 h-5 rounded"
+                        />
+                        <span className="text-base font-semibold text-gray-700">
+                          Use Gradient Background
+                        </span>
+                      </label>
+                    </div>
+
+                    {/* Button Customization */}
+                    {showButton && (
+                      <>
+                        <div className="mb-4">
+                          <label className="block text-base font-semibold text-gray-700 mb-2">
+                            Button Text
+                          </label>
+                          <input
+                            type="text"
+                            value={buttonText}
+                            onChange={(e) => setButtonText(e.target.value)}
+                            placeholder="e.g. Leave a Review"
+                            className="w-full px-4 py-3 text-base border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-300"
+                          />
+                        </div>
+
+                        <div className="mb-4">
+                          <label className="block text-base font-semibold text-gray-700 mb-2">
+                            Button Color
+                          </label>
+                          <input
+                            type="color"
+                            value={buttonColor}
+                            onChange={(e) => setButtonColor(e.target.value)}
+                            className="w-24 h-14 border-2 border-gray-300 rounded-xl cursor-pointer"
+                          />
+                        </div>
+                      </>
+                    )}
+
+                    {/* Background Colors */}
+                    {gradientBackground ? (
+                      <div className="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                          <label className="block text-base font-semibold text-gray-700 mb-2">
+                            Gradient Start
+                          </label>
+                          <input
+                            type="color"
+                            value={gradientColor1}
+                            onChange={(e) => setGradientColor1(e.target.value)}
+                            className="w-full h-14 border-2 border-gray-300 rounded-xl cursor-pointer"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-base font-semibold text-gray-700 mb-2">
+                            Gradient End
+                          </label>
+                          <input
+                            type="color"
+                            value={gradientColor2}
+                            onChange={(e) => setGradientColor2(e.target.value)}
+                            className="w-full h-14 border-2 border-gray-300 rounded-xl cursor-pointer"
+                          />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="mb-4">
+                        <label className="block text-base font-semibold text-gray-700 mb-2">
+                          Background Color
                         </label>
                         <input
-                          type="range"
-                          min={40}
-                          max={150}
-                          value={logoSize}
-                          onChange={(e) => setLogoSize(Number(e.target.value))}
-                          className="w-full"
+                          type="color"
+                          value={backgroundColor}
+                          onChange={(e) => setBackgroundColor(e.target.value)}
+                          className="w-24 h-14 border-2 border-gray-300 rounded-xl cursor-pointer"
                         />
                       </div>
+                    )}
 
+                    {/* QR & Text Colors */}
+                    <div className="grid grid-cols-2 gap-4 mb-4">
                       <div>
-                        <label className="block text-base font-semibold text-gray-700 mb-3">
-                          Logo Position
+                        <label className="block text-base font-semibold text-gray-700 mb-2">
+                          Text Color
                         </label>
-                        <select
-                          value={logoPosition}
-                          onChange={(e) => setLogoPosition(e.target.value)}
-                          className="w-full px-4 py-3 text-base border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-300"
-                        >
-                          <option value="above">Above QR Code</option>
-                          <option value="center">Center (Over QR)</option>
-                        </select>
+                        <input
+                          type="color"
+                          value={textColor}
+                          onChange={(e) => setTextColor(e.target.value)}
+                          className="w-full h-14 border-2 border-gray-300 rounded-xl cursor-pointer"
+                        />
                       </div>
-                    </>
-                  )}
+                      <div>
+                        <label className="block text-base font-semibold text-gray-700 mb-2">
+                          QR Code Color
+                        </label>
+                        <input
+                          type="color"
+                          value={qrColor}
+                          onChange={(e) => setQrColor(e.target.value)}
+                          className="w-full h-14 border-2 border-gray-300 rounded-xl cursor-pointer"
+                        />
+                      </div>
+                    </div>
+
+                    {/* QR Border Radius */}
+                    <div className="mb-4">
+                      <label className="block text-base font-semibold text-gray-700 mb-2">
+                        QR Corner Roundness: {qrBorderRadius}px
+                      </label>
+                      <input
+                        type="range"
+                        min={0}
+                        max={40}
+                        value={qrBorderRadius}
+                        onChange={(e) => setQrBorderRadius(Number(e.target.value))}
+                        className="w-full"
+                      />
+                    </div>
+
+                    {/* Logo Controls */}
+                    {logoSrc && (
+                      <>
+                        <div className="mb-4">
+                          <label className="block text-base font-semibold text-gray-700 mb-2">
+                            Logo Size: {logoSize}px
+                          </label>
+                          <input
+                            type="range"
+                            min={40}
+                            max={150}
+                            value={logoSize}
+                            onChange={(e) => setLogoSize(Number(e.target.value))}
+                            className="w-full"
+                          />
+                        </div>
+
+                        <div className="mb-4">
+                          <label className="block text-base font-semibold text-gray-700 mb-2">
+                            Logo Position
+                          </label>
+                          <select
+                            value={logoPosition}
+                            onChange={(e) => setLogoPosition(e.target.value)}
+                            className="w-full px-4 py-3 text-base border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-300"
+                          >
+                            <option value="above">Above QR Code</option>
+                            <option value="center">Center (Over QR)</option>
+                          </select>
+                        </div>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -1484,7 +1527,7 @@ function QRContent() {
                     className="flex items-center justify-center gap-3 bg-red-600 text-white px-6 py-4 rounded-xl hover:bg-red-700 disabled:opacity-70 transition text-lg font-medium shadow-lg hover:shadow-xl"
                   >
                     <TrashIcon className="w-6 h-6" />
-                    Delete
+                    Delete QR
                   </button>
                 </div>
               </div>
@@ -1506,7 +1549,7 @@ function QRContent() {
           </div>
         )}
 
-        {/* Delete Confirmation Dialog */}
+        {/* Delete QR Confirmation Dialog */}
         {showDeleteDialog && (
           <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-8">
