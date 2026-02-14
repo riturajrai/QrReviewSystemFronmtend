@@ -90,10 +90,9 @@ function QRContent() {
       return;
     }
     if (!companyName.trim()) {
-      setSettingsError("Please enter your company name");
+      setSettingsError("Please enter your brand name");
       return;
     }
-
     setSettingsLoading(true);
     setSettingsSuccess("");
     setSettingsError("");
@@ -239,7 +238,7 @@ function QRContent() {
     setDecorativeStars(false);
     setQrBorderRadius(20);
     setShowGoogleLogo(true);
-    
+
     await fetchFormSettings();
   };
 
@@ -291,7 +290,7 @@ function QRContent() {
 
     const qrImg = new Image();
     qrImg.crossOrigin = "anonymous";
-    
+
     qrImg.onload = () => {
       // Draw background
       if (gradientBackground) {
@@ -344,13 +343,13 @@ function QRContent() {
           ctx.shadowBlur = 4;
           ctx.shadowOffsetX = 2;
           ctx.shadowOffsetY = 2;
-          
+
           ctx.fillStyle = textColor;
           ctx.font = "bold 72px Arial";
           const words = headerText.split(' ');
           let line = '';
           let lines = [];
-          
+
           words.forEach(word => {
             const testLine = line + word + ' ';
             const metrics = ctx.measureText(testLine);
@@ -362,17 +361,17 @@ function QRContent() {
             }
           });
           lines.push(line);
-          
+
           lines.forEach(textLine => {
             ctx.fillText(textLine.trim(), canvas.width / 2, currentY);
             currentY += 90;
           });
-          
+
           ctx.shadowColor = "transparent";
           ctx.shadowBlur = 0;
           ctx.shadowOffsetX = 0;
           ctx.shadowOffsetY = 0;
-          
+
           currentY += 40;
         }
 
@@ -388,25 +387,25 @@ function QRContent() {
         const qrSize = 600;
         const qrX = (canvas.width - qrSize) / 2;
         const qrY = currentY;
-        
+
         ctx.shadowColor = "rgba(0, 0, 0, 0.2)";
         ctx.shadowBlur = 25;
         ctx.shadowOffsetX = 0;
         ctx.shadowOffsetY = 10;
-        
+
         ctx.fillStyle = "#ffffff";
         ctx.save();
         roundRect(ctx, qrX - 40, qrY - 40, qrSize + 80, qrSize + 80, qrBorderRadius);
         ctx.fill();
         ctx.restore();
-        
+
         ctx.shadowColor = "transparent";
         ctx.shadowBlur = 0;
         ctx.shadowOffsetX = 0;
         ctx.shadowOffsetY = 0;
-        
+
         ctx.drawImage(qrImg, qrX, qrY, qrSize, qrSize);
-        
+
         if (qrColor !== "#000000") {
           colorizeQR(ctx, qrColor, qrX, qrY, qrSize, qrSize);
         }
@@ -419,12 +418,12 @@ function QRContent() {
             const logoDisplaySize = logoSize * 1.5;
             const logoX = (canvas.width - logoDisplaySize) / 2;
             const logoY = qrY + (qrSize - logoDisplaySize) / 2;
-            
+
             ctx.fillStyle = "#ffffff";
             ctx.beginPath();
-            ctx.arc(logoX + logoDisplaySize/2, logoY + logoDisplaySize/2, logoDisplaySize/2 + 10, 0, Math.PI * 2);
+            ctx.arc(logoX + logoDisplaySize / 2, logoY + logoDisplaySize / 2, logoDisplaySize / 2 + 10, 0, Math.PI * 2);
             ctx.fill();
-            
+
             ctx.drawImage(logoImg, logoX, logoY, logoDisplaySize, logoDisplaySize);
             finishDrawing();
           };
@@ -446,7 +445,7 @@ function QRContent() {
             const textWords = customText.split(' ');
             let textLine = '';
             let textLines = [];
-            
+
             textWords.forEach(word => {
               const testLine = textLine + word + ' ';
               const metrics = ctx.measureText(testLine);
@@ -458,7 +457,7 @@ function QRContent() {
               }
             });
             textLines.push(textLine);
-            
+
             textLines.forEach(line => {
               ctx.fillText(line.trim(), canvas.width / 2, currentY);
               currentY += 60;
@@ -472,9 +471,9 @@ function QRContent() {
             const starSpacing = 25;
             const totalStarsWidth = (starSize * 5) + (starSpacing * 4);
             const startX = (canvas.width - totalStarsWidth) / 2;
-            
+
             for (let i = 0; i < 5; i++) {
-              drawStar(ctx, startX + (i * (starSize + starSpacing)) + starSize/2, currentY, starSize/2);
+              drawStar(ctx, startX + (i * (starSize + starSpacing)) + starSize / 2, currentY, starSize / 2);
             }
             currentY += starSize + 70;
           }
@@ -485,26 +484,26 @@ function QRContent() {
             const buttonHeight = 110;
             const buttonX = (canvas.width - buttonWidth) / 2;
             const buttonY = currentY;
-            
+
             ctx.shadowColor = "rgba(0, 0, 0, 0.25)";
             ctx.shadowBlur = 20;
             ctx.shadowOffsetX = 0;
             ctx.shadowOffsetY = 8;
-            
+
             ctx.fillStyle = buttonColor;
             roundRect(ctx, buttonX, buttonY, buttonWidth, buttonHeight, 55);
             ctx.fill();
-            
+
             ctx.shadowColor = "transparent";
             ctx.shadowBlur = 0;
             ctx.shadowOffsetX = 0;
             ctx.shadowOffsetY = 0;
-            
+
             const buttonTextColor = getContrastColor(buttonColor);
             ctx.fillStyle = buttonTextColor;
             ctx.font = "bold 48px Arial";
             ctx.fillText(buttonText, canvas.width / 2, buttonY + buttonHeight / 2 + 16);
-            
+
             currentY += buttonHeight + 60;
           }
 
@@ -514,14 +513,14 @@ function QRContent() {
             ctx.shadowBlur = 3;
             ctx.shadowOffsetX = 1;
             ctx.shadowOffsetY = 1;
-            
+
             ctx.fillStyle = textColor;
             ctx.font = "bold 52px Arial";
-            
+
             const footerWords = footerText.split(' ');
             let footerLine = '';
             let footerLines = [];
-            
+
             footerWords.forEach(word => {
               const testLine = footerLine + word + ' ';
               const metrics = ctx.measureText(testLine);
@@ -533,12 +532,12 @@ function QRContent() {
               }
             });
             footerLines.push(footerLine);
-            
+
             footerLines.forEach(line => {
               ctx.fillText(line.trim(), canvas.width / 2, currentY);
               currentY += 65;
             });
-            
+
             ctx.shadowColor = "transparent";
             ctx.shadowBlur = 0;
             ctx.shadowOffsetX = 0;
@@ -574,18 +573,18 @@ function QRContent() {
   function drawGoogleLogo(ctx, centerX, centerY) {
     ctx.save();
     ctx.font = "bold 80px Arial";
-    
+
     const text = "Google";
     const colors = ["#4285F4", "#EA4335", "#FBBC04", "#4285F4", "#34A853", "#EA4335"];
-    
+
     let currentX = centerX - 180;
-    
+
     for (let i = 0; i < text.length; i++) {
       ctx.fillStyle = colors[i];
       ctx.fillText(text[i], currentX, centerY);
       currentX += ctx.measureText(text[i]).width;
     }
-    
+
     ctx.restore();
   }
 
@@ -641,7 +640,7 @@ function QRContent() {
 
     ctx.beginPath();
     ctx.moveTo(cx, cy - outerRadius);
-    
+
     for (let i = 0; i < spikes; i++) {
       x = cx + Math.cos(rot) * outerRadius;
       y = cy + Math.sin(rot) * outerRadius;
@@ -653,21 +652,21 @@ function QRContent() {
       ctx.lineTo(x, y);
       rot += step;
     }
-    
+
     ctx.lineTo(cx, cy - outerRadius);
     ctx.closePath();
-    
+
     const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
     gradient.addColorStop(0, "#FFF700");
     gradient.addColorStop(0.5, "#FFD700");
     gradient.addColorStop(1, "#FFA500");
     ctx.fillStyle = gradient;
     ctx.fill();
-    
+
     ctx.shadowColor = "rgba(255, 215, 0, 0.6)";
     ctx.shadowBlur = 8;
     ctx.fill();
-    
+
     ctx.shadowColor = "transparent";
     ctx.shadowBlur = 0;
   }
@@ -676,7 +675,7 @@ function QRContent() {
     const imageData = ctx.getImageData(x, y, w, h);
     const data = imageData.data;
     const [r, g, b] = hexToRgb(hex);
-    
+
     for (let i = 0; i < data.length; i += 4) {
       if (data[i] < 50 && data[i + 1] < 50 && data[i + 2] < 50 && data[i + 3] > 0) {
         data[i] = r;
@@ -791,7 +790,7 @@ function QRContent() {
   const handleTemplateSelect = async (index) => {
     setSelectedTemplate(index);
     const template = templates[index];
-    
+
     setBackgroundColor(template.backgroundColor || "#ffffff");
     setQrColor(template.qrColor);
     setTextColor(template.textColor);
@@ -808,7 +807,7 @@ function QRContent() {
     setShowGoogleLogo(template.showGoogleLogo !== false);
     if (template.gradientColor1) setGradientColor1(template.gradientColor1);
     if (template.gradientColor2) setGradientColor2(template.gradientColor2);
-    
+
     await fetchFormSettings();
   };
 
@@ -839,9 +838,8 @@ function QRContent() {
         {[1, 2, 3, 4, 5].map((star) => (
           <StarSolidIcon
             key={star}
-            className={`w-4 h-4 ${
-              star <= threshold ? "text-indigo-600" : "text-gray-300"
-            }`}
+            className={`w-4 h-4 ${star <= threshold ? "text-indigo-600" : "text-gray-300"
+              }`}
           />
         ))}
         <span className="ml-2 text-gray-600 text-sm">
@@ -866,26 +864,16 @@ function QRContent() {
 
         {/* No QR Yet */}
         {!fetching && !qr && (
-          <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200 text-center">
-            <QrCodeIcon className="w-24 h-24 text-gray-300 mx-auto mb-6" />
-            <p className="text-xl text-gray-700 mb-6">
-              You don't have a QR code yet.
+          <div className="bg-white p-8 rounded-2xl shadow-lg text-center">
+            <QrCodeIcon className="w-20 h-20 text-indigo-400 mx-auto mb-4 animate-pulse" />
+            <h2 className="text-xl font-bold text-gray-800">
+              Setting up your QR Code...
+            </h2>
+            <p className="text-gray-500 mt-2">
+              Your QR is automatically created after signup.
             </p>
-            <button
-              onClick={generateQR}
-              disabled={loadingQR}
-              className="inline-flex items-center gap-3 bg-indigo-600 text-white px-6 py-4 rounded-xl hover:bg-indigo-700 disabled:opacity-70 transition text-lg font-medium touch-manipulation"
-            >
-              {loadingQR ? (
-                <ArrowPathIcon className="w-6 h-6 animate-spin" />
-              ) : (
-                <QrCodeIcon className="w-6 h-6" />
-              )}
-              {loadingQR ? "Generating..." : "Generate QR"}
-            </button>
           </div>
         )}
-
         {/* QR Exists */}
         {qr && (
           <>
@@ -897,13 +885,12 @@ function QRContent() {
                   <button
                     key={index}
                     onClick={() => handleTemplateSelect(index)}
-                    className={`p-3 rounded-xl border-3 transition-all hover:scale-105 ${
-                      selectedTemplate === index
+                    className={`p-3 rounded-xl border-3 transition-all hover:scale-105 ${selectedTemplate === index
                         ? "border-indigo-600 bg-indigo-50 shadow-lg ring-2 ring-indigo-300"
                         : "border-gray-300 hover:border-gray-400"
-                    }`}
+                      }`}
                   >
-                    <div 
+                    <div
                       className="w-full h-24 flex items-center justify-center rounded-lg mb-2 relative overflow-hidden"
                       style={
                         template.gradientBackground
@@ -933,7 +920,7 @@ function QRContent() {
               <div className="bg-white p-6 rounded-2xl shadow-xl border border-gray-200">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">Preview</h2>
                 <div className="flex justify-center">
-                  <div 
+                  <div
                     className="w-full max-w-md p-8 rounded-2xl shadow-2xl relative overflow-hidden"
                     style={getBackgroundStyle()}
                   >
@@ -991,7 +978,7 @@ function QRContent() {
 
                     {/* Header Text */}
                     {headerText && (
-                      <h3 
+                      <h3
                         className="text-xl sm:text-2xl font-bold text-center mb-6 relative z-10"
                         style={{ color: textColor }}
                       >
@@ -1013,7 +1000,7 @@ function QRContent() {
 
                     {/* Brand Name */}
                     {companyName && (
-                      <p 
+                      <p
                         className="text-lg sm:text-xl font-bold text-center mb-6 relative z-10"
                         style={{ color: textColor }}
                       >
@@ -1022,7 +1009,7 @@ function QRContent() {
                     )}
 
                     {/* QR Code */}
-                    <div 
+                    <div
                       className="bg-white p-5 mx-auto w-fit mb-6 relative z-10 shadow-lg"
                       style={{ borderRadius: `${qrBorderRadius}px` }}
                     >
@@ -1053,7 +1040,7 @@ function QRContent() {
 
                     {/* Custom Text */}
                     {customText && (
-                      <p 
+                      <p
                         className="text-base sm:text-lg text-center mb-6 relative z-10"
                         style={{ color: textColor }}
                       >
@@ -1082,7 +1069,7 @@ function QRContent() {
                       <div className="flex justify-center mb-6 relative z-10">
                         <button
                           className="px-10 py-3 font-bold text-base rounded-full shadow-lg transition-transform hover:scale-105"
-                          style={{ 
+                          style={{
                             backgroundColor: buttonColor,
                             color: getContrastColor(buttonColor)
                           }}
@@ -1094,7 +1081,7 @@ function QRContent() {
 
                     {/* Footer Text */}
                     {footerText && (
-                      <p 
+                      <p
                         className="text-lg sm:text-xl font-bold text-center relative z-10"
                         style={{ color: textColor }}
                       >
@@ -1108,7 +1095,7 @@ function QRContent() {
               {/* Customization Panel */}
               <div className="bg-white p-6 rounded-2xl shadow-xl border border-gray-200">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">Customize</h2>
-                
+
                 <div className="space-y-6 max-h-[700px] overflow-y-auto pr-2">
                   {/* Form Settings Section */}
                   <div className="border-b border-gray-200 pb-6">
@@ -1120,7 +1107,7 @@ function QRContent() {
                     {/* Company Name */}
                     <div className="mb-4">
                       <label className="block text-base font-semibold text-gray-700 mb-2">
-                        Company Name
+                        Brand Name
                       </label>
                       <input
                         type="text"
@@ -1151,7 +1138,7 @@ function QRContent() {
                     {/* Logo Upload */}
                     <div className="mb-4">
                       <label className="block text-base font-semibold text-gray-700 mb-2">
-                        Company Logo
+                       Brand Logo
                       </label>
                       {logoSrc && (
                         <img
