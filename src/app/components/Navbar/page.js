@@ -16,7 +16,9 @@ import {
   Menu,
   X,
   CheckCircle,
+  History
 } from "lucide-react";
+
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -156,7 +158,14 @@ export default function Navbar() {
                           <User className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" />
                           My Profile
                         </Link>
-
+                        <Link
+                          href="/subscription-history"
+                          className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-gray-700 transition-colors text-xs sm:text-sm"
+                          onClick={() => setIsDropdownOpen(false)}
+                        >
+                          <History className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" />
+                          Subscription History
+                        </Link>
                         <button
                           onClick={handleLogout}
                           className="flex items-center gap-3 px-4 py-3 hover:bg-red-50 text-red-600 w-full text-left transition-colors text-xs sm:text-sm"
@@ -176,6 +185,7 @@ export default function Navbar() {
                   >
                     Login
                   </Link>
+
                   <Link
                     href="/signup"
                     className="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white px-4 sm:px-5 py-2.5 rounded-xl font-medium shadow-md hover:shadow-lg transition-all text-xs sm:text-sm"
@@ -240,6 +250,14 @@ export default function Navbar() {
                     {label}
                   </Link>
                 ))}
+                <Link
+                  href="/subscription-history"
+                  className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-gray-700 transition-colors text-xs sm:text-sm"
+                  onClick={() => setIsDropdownOpen(false)}
+                >
+                  <History className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" />
+                  Subscription History
+                </Link>
 
                 <Link
                   href="/profile"
