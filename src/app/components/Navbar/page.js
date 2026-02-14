@@ -63,7 +63,6 @@ export default function Navbar() {
     { href: "/generate-qr", label: "Generate QR", icon: QrCode },
     { href: "/subscribe", label: "Subscription", icon: FileText },
     { href: "/submissions", label: "Submissions", icon: FileText },
-    { href: "/formSettings", label: "Form Settings", icon: FileText },
   ];
   // Public links visible only to non-logged-in users
   const publicLinks = [
