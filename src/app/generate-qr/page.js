@@ -1121,7 +1121,7 @@ function QRContent() {
                     {/* Redirect URL */}
                     <div className="mb-4">
                       <label className="block text-base font-semibold text-gray-700 mb-2">
-                        Redirect URL
+                        Brand URL
                       </label>
                       <input
                         type="url"
@@ -1520,7 +1520,7 @@ function QRContent() {
               </div>
             </div>
           </>
-        )}
+        )} 
 
         {/* Error Message */}
         {error && (
