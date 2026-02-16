@@ -1508,14 +1508,14 @@ function QRContent() {
                     Download QR
                   </button>
 
-                  {/* <button
+                  <button
                     onClick={() => setShowDeleteDialog(true)}
                     disabled={loadingQR}
                     className="flex items-center justify-center gap-3 bg-red-600 text-white px-6 py-4 rounded-xl hover:bg-red-700 disabled:opacity-70 transition text-lg font-medium shadow-lg hover:shadow-xl"
                   >
                     <TrashIcon className="w-6 h-6" />
                     Delete QR
-                  </button> */}
+                  </button>
                 </div>
               </div>
             </div>
